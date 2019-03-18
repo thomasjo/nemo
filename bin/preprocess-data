@@ -5,4 +5,4 @@ set -eu
 parent_dir=$(dirname $(readlink -f "$0"))
 root_dir=$(dirname $parent_dir)
 
-"${parent_dir}/pyrun" python/preprocess-data.py
+"${parent_dir}/pyrun" python/preprocess_data.py
