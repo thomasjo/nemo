@@ -35,7 +35,6 @@ def _imwrite(path, image, suffix=None):
 
 def blur(image, size):
     image = cv.medianBlur(image, size)
-    # image = cv.GaussianBlur(image, (15, 15), 15)
 
     return image
 
@@ -45,8 +44,6 @@ def binary(image, blur_size, threshold=127):
         image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 
     image = blur(image, blur_size)
-    # _, image = cv.threshold(image, 130, 255, cv.THRESH_BINARY)
-    # _, image = cv.threshold(image, 55, 255, cv.THRESH_BINARY_INV)
     _, image = cv.threshold(image, threshold, 255, cv.THRESH_BINARY)
 
     return image
@@ -74,103 +71,35 @@ for image_file in sorted(raw_data_dir.rglob("*.tiff")):
 
     output_file = processed_data_dir / "{}.png".format(image_file.stem)
 
-    # Segment/binarize using scikit-image...
-    # image = imageio.imread(image_file)
-    # labels = segmentation.slic(image)
-    # output_image = cmap.to_rgba(labels, bytes=True)
-    # imageio.imwrite(output_file, output_image)
-
     # Segment/binarize using OpenCV...
     image = _imread(image_file)
-    # print(image.shape)
-
-    # image_blur = blur(image)
-    # _imwrite(image_file, image_blur, suffix="blur")
-
-    # image_hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
-
-    # image_hue = image_hsv[..., 0]
-    # _imwrite(image_file, image_hue, suffix="hue")
-
-    # image_sat = image_hsv[..., 1]
-    # _imwrite(image_file, image_sat, suffix="sat")
-
-    # image_val = image_hsv[..., 2]
-    # _imwrite(image_file, image_val, suffix="val")
-
-    # image_hue_norm = np.zeros_like(image_hue)
-    # image_hue_norm = cv.normalize(image_hue, image_hue_norm, 0, 255, cv.NORM_MINMAX)
-    # _imwrite(image_file, image_hue_norm, suffix="hue_norm")
-
-    # image_hue_norm_blur = cv.medianBlur(image_hue_norm, 31)
-    # _imwrite(image_file, image_hue_norm_blur, suffix="hue_norm_blur")
-
     image_binary = binary(image, blur_size=75, threshold=70)
-    # _imwrite(image_file, image_binary, suffix="binary")
-    # print(np.unique(image_binary))
-    # print(image_binary.dtype)
 
+    # Find and remove the metal "border".
     labels = np.zeros_like(image_binary)
     _, labels = cv.connectedComponents(image_binary, labels)
-
-    # output_image = cmap.to_rgba(labels, bytes=True)
-    # imageio.imwrite(_output_path(image_file, suffix="cc"), output_image)
-
     unique, counts = np.unique(labels[labels > 0], return_counts=True)
     idx_max = np.argmax(counts)
     label_max = unique[idx_max]
-    mask = (labels == label_max).astype(np.uint8)
-    mask[mask == 1] = 255
-    # print(np.unique(mask))
-    # print(mask.dtype)
-
-    # imageio.imwrite(_output_path(image_file, suffix="mask"), mask)
-
-    # image_binary = binary(image, blur_size=31, threshold=130) - mask
     image_binary = binary(image, blur_size=31, threshold=130)
     image_binary[labels == label_max] = 0
-    _imwrite(image_file, image_binary, suffix="binary")
 
-    # print(np.unique(image_binary))
-    # print(image_binary.dtype)
-
+    # Find all regions of interest.
     labels = np.zeros_like(image_binary)
     _, labels = cv.connectedComponents(image_binary, labels)
-
     unique, counts = np.unique(labels[labels > 0], return_counts=True)
-    # print(unique)
-    # print(counts)
+    image_binary[np.isin(labels, unique[counts < 1024])] = 0
+    _imwrite(image_file, image_binary, suffix="binary")
 
-    debug = image_binary.copy()
-    # label_max = unique[np.argsort(counts)[0]]
-    # print(label_max)
-    # debug[labels != label_max] = 0
-    # print(np.sum(debug) / 255)
-
-    # print(unique[counts < 1024])
-
-    debug[np.isin(labels, unique[counts < 1024])] = 0
-    _imwrite(image_file, debug, suffix="binary")
-
-    # image_seg = np.zeros_like(image)
+    # Create an image with ROIs overlayed. Useful for visual debugging.
     image_seg = image.copy()
-    # image_seg = np.dstack((image_seg, np.zeros_like(image_binary)))
     print(image_seg.shape)
-    # image_seg[debug == 255, 3] = 255
-    image_seg[debug == 255, 2] = 255
-    image_seg[debug == 255, 1] = 0
-    image_seg[debug == 255, 0] = 127
-
-    # _imwrite(image_file, image_seg, suffix="seg")
-
-    # image = cv.cvtColor(image, cv.COLOR_BGR2BGRA)
-    # image[..., 3] = 255
+    image_seg[image_binary == 255, 2] = 255
+    image_seg[image_binary == 255, 1] = 0
+    image_seg[image_binary == 255, 0] = 127
 
     alpha = 0.5
     image_overlay = cv.addWeighted(image_seg, alpha, image, 1 - alpha, 0)
     _imwrite(image_file, image_overlay, suffix="overlay")
-
-    # image_adaptive_gaussian = adaptive_gaussian(image)
-    # _imwrite(image_file, image_adaptive_gaussian, suffix="adaptive_gaussian")
 
     # break
