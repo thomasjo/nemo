@@ -1,0 +1,13 @@
+#!/bin/sh
+
+parent_dir=$(dirname $(readlink -f "$0"))
+root_dir=$(dirname $parent_dir)
+
+image_name="thomasjo/nemo"
+
+docker run --rm -it \
+  --volume "${root_dir}/data:/root/data" \
+  --volume "${root_dir}/python:/root/python" \
+  --workdir "/root" \
+  $image_name \
+  $@
