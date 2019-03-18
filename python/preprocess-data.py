@@ -55,12 +55,7 @@ def adaptive_gaussian(image):
 
     image = blur(image)
     image = cv.adaptiveThreshold(
-        image,
-        255,
-        cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv.THRESH_BINARY,
-        11,
-        2
+        image, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2
     )
 
     return image
