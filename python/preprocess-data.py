@@ -134,11 +134,39 @@ for image_file in sorted(raw_data_dir.rglob("*.tiff")):
     # Create an image with bounding boxes. Useful for visual debugging.
     image_bbox = image.copy()
 
+    patch_num = 0
     for i in range(1, n_labels):
         if np.isin(i, labels[pixel_counts < 1024]):
             continue
 
+        patch_num += 1
+
         # Add bounding box for object to bounding box image.
         image_bbox = _add_bbox(stats[i], image_bbox)
+
+        # Extract and save image patch from object.
+        cx, cy = centroids[i]
+
+        # TODO: Extract cropping dimension stuff into a function.
+        if cx - patch_width // 2 < 0:
+            cx += cx - patch_width // 2
+            cx = max(cx, patch_width // 2)
+        elif cx + patch_width // 2 > image.shape[1]:
+            cx -= image.shape[1] - (cx + patch_width // 2)
+            cx = min(cx, image.shape[1] - patch_width // 2)
+        col_crop = slice(cx - patch_width // 2, cx + patch_width // 2)
+
+        # TODO: Extract cropping dimension stuff into a function.
+        if cy - patch_height // 2 < 0:
+            cy += cy - patch_height // 2
+            cy = max(cy, patch_height // 2)
+        elif cy + patch_height // 2 > image.shape[0]:
+            cy -= image.shape[0] - (cy + patch_height // 2)
+            cy = min(cy, image.shape[0] - patch_height // 2)
+        row_crop = slice(cy - patch_height // 2, cy + patch_height // 2)
+
+        _imwrite(
+            image_file, image[row_crop, col_crop], suffix="patch{}".format(patch_num)
+        )
 
     _imwrite(image_file, image_bbox, suffix="bbox")
