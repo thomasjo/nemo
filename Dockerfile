@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM nvidia/cuda:10.0-cudnn7-runtime-ubuntu18.04
 
 # Ensure apt-get is in noninteractive mode during build.
 ARG DEBIAN_FRONTEND=interactive
