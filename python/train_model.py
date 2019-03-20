@@ -117,3 +117,7 @@ history = model.fit(
     # validation_split=validation_split,
     # validation_steps=validation_steps,
 )
+
+loss, accuracy = model.evaluate(test_batches, steps=20)
+print("final loss: {:.2f}".format(loss))
+print("final accuracy: {:.2f}".format(accuracy))
