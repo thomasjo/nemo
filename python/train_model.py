@@ -99,4 +99,21 @@ model.compile(
     loss="binary_crossentropy",
     metrics=["accuracy"],
 )
-print(model.summary())
+model.summary()
+
+loss0, accuracy0 = model.evaluate(train_batches, steps=20)
+print("initial loss: {:.2f}".format(loss0))
+print("initial accuracy: {:.2f}".format(accuracy0))
+
+initial_epochs = 50
+steps_per_epoch = round(train_count) // BATCH_SIZE
+validation_split = 0.1
+validation_steps = 20
+
+history = model.fit(
+    train_batches.repeat(),
+    epochs=initial_epochs,
+    steps_per_epoch=steps_per_epoch,
+    # validation_split=validation_split,
+    # validation_steps=validation_steps,
+)
