@@ -92,7 +92,7 @@ prediction_batch = prediction_layer(feature_batch)
 print(prediction_batch.shape)
 print()
 
-base_learning_rate = 0.0001
+base_learning_rate = 0.0005
 model = keras.Sequential([base_model, prediction_layer])
 model.compile(
     optimizer=keras.optimizers.RMSprop(lr=base_learning_rate),
