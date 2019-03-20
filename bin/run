@@ -7,6 +7,7 @@ image_name="thomasjo/nemo"
 
 docker run --rm -it \
   --volume "${root_dir}/tmp/keras:/root/.keras" \
+  --volume "${root_dir}/tmp/nv:/root/.nv" \
   --volume "${root_dir}/data:/root/data" \
   --volume "${root_dir}/output:/root/output" \
   --volume "${root_dir}/python:/root/python:ro" \
