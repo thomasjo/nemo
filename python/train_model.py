@@ -3,6 +3,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow.keras as keras
+
 from tensorflow.keras.applications import VGG16
 
 # Used for auto-tuning dataset prefetching parameters.

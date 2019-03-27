@@ -1,9 +1,8 @@
 from pathlib import Path
 
+import cv2 as cv
 import imageio
 import numpy as np
-
-import cv2 as cv
 import skimage.segmentation as segmentation
 
 data_dir = Path("/root/data")
@@ -73,9 +72,7 @@ def _add_bbox(stats, image):
     # Add bounding box for object.
     bbox_color = (0, 0, 255)
     bbox_thickness = 2
-    updated_image = cv.rectangle(
-        image, top_left, bottom_right, bbox_color, bbox_thickness
-    )
+    updated_image = cv.rectangle(image, top_left, bottom_right, bbox_color, bbox_thickness)
 
     return updated_image
 
@@ -160,8 +157,6 @@ for image_file in sorted(raw_data_dir.rglob("*.tiff")):
             cy = min(cy, image.shape[0] - patch_height // 2)
         row_crop = slice(cy - patch_height // 2, cy + patch_height // 2)
 
-        _imwrite(
-            image_file, image[row_crop, col_crop], suffix="patch{}".format(patch_num)
-        )
+        _imwrite(image_file, image[row_crop, col_crop], suffix="patch{}".format(patch_num))
 
     _imwrite(image_file, image_bbox, suffix="bbox")
