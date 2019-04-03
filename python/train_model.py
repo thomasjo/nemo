@@ -131,4 +131,4 @@ if __name__ == "__main__":
     timestamp = datetime.utcnow()
     timestamp = timestamp.strftime("Ymd")
     model_file = output_dir / "nemo-{}-{:.2f}.h5".format(timestamp, accuracy)
-    model.save(str(model_file))
+    model.save(str(model_file), include_optimizer=False)
