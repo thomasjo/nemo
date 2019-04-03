@@ -6,6 +6,7 @@ root_dir=$(dirname $parent_dir)
 image_name="thomasjo/nemo"
 
 docker run --rm -it \
+  --env TF_CPP_MIN_LOG_LEVEL="2" \
   --volume "${root_dir}/tmp/keras:/root/.keras" \
   --volume "${root_dir}/tmp/nv:/root/.nv" \
   --volume "${root_dir}/data:/root/data" \
