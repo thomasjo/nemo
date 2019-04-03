@@ -21,7 +21,7 @@ def preprocess_image(image):
     return image
 
 
-def load_and_preprocess_image(path, label):
+def load_and_preprocess_image(path, label=None):
     image = tf.io.read_file(path)
     image = preprocess_image(image)
 
@@ -30,23 +30,36 @@ def load_and_preprocess_image(path, label):
     return image, label
 
 
+def image_paths(path):
+    image_paths = []
+
+    for file in sorted(path.rglob("*.png")):
+        image_paths.append(str(file))
+
+    return image_paths
+
+
 def image_paths_and_labels(path, label_to_index):
     image_paths = []
     image_labels = []
 
-    for file in path.rglob("*.png"):
+    for file in sorted(path.rglob("*.png")):
         image_paths.append(str(file))
         image_labels.append(label_to_index[file.parent.name])
 
     return image_paths, image_labels
 
 
-def batched_dataset(source_dir, label_to_index, shuffle=True):
-    paths, labels = image_paths_and_labels(source_dir, label_to_index)
-    count = len(paths)
+def batched_dataset(source_dir, label_to_index=None, shuffle=True):
+    if label_to_index is None:
+        paths = image_paths(source_dir)
+        dataset = tf.data.Dataset.from_tensor_slices((paths))
+    else:
+        paths, labels = image_paths_and_labels(source_dir, label_to_index)
+        dataset = tf.data.Dataset.from_tensor_slices((paths, labels))
 
-    dataset = tf.data.Dataset.from_tensor_slices((paths, labels))
     dataset = dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+    count = len(paths)
 
     if shuffle:
         dataset = dataset.shuffle(count)
