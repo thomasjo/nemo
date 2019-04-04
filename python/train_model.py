@@ -129,6 +129,6 @@ if __name__ == "__main__":
     output_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.utcnow()
-    timestamp = timestamp.strftime("%Y%m%d-%H%M")
+    timestamp = timestamp.strftime("%Y%m%d%H%M")
     model_file = output_dir / "nemo-{}-{:.2f}.h5".format(timestamp, accuracy)
     model.save(str(model_file), include_optimizer=False)
