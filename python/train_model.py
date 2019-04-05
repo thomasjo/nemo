@@ -1,7 +1,10 @@
+import shutil
+
 from datetime import datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
 
@@ -78,19 +81,57 @@ def process_labels(source_dir):
 
 
 if __name__ == "__main__":
-    file_dir = Path(__file__).parent.resolve()
+    file_dir: Path = Path(__file__).parent.resolve()
     root_dir = file_dir.parent
 
     # TODO: Make these configurable?
-    data_dir = root_dir / "data"
-    train_dir = data_dir / "train"
-    test_dir = data_dir / "test"
+    data_dir: Path = root_dir / "data"
+    train_dir: Path = data_dir / "train"
+    test_dir: Path = data_dir / "test"
+
+    # Split training data into training and validation sets.
+    # TODO: Find a better way of doing this.
+    orig_train_dir = train_dir
+    train_dir = train_dir.with_name("train-tmp")
+    valid_dir = data_dir / "valid-tmp"
+
+    shutil.rmtree(train_dir, ignore_errors=True)
+    shutil.rmtree(valid_dir, ignore_errors=True)
+
+    train_dir.mkdir(exist_ok=True)
+    valid_dir.mkdir(exist_ok=True)
+
+    image_paths = list(orig_train_dir.rglob("*.png"))
+    image_count = len(image_paths)
+    train_count = round(image_count * 0.85)
+    valid_count = image_count - train_count
+
+    shuff_idx = np.random.permutation(image_count)
+    train_idx = shuff_idx[:train_count]
+    valid_idx = shuff_idx[train_count:]
+
+    assert train_count == len(train_idx)
+    assert valid_count == len(valid_idx)
+
+    for i in train_idx.flat:
+        old_path: Path = image_paths[i]
+        new_path = train_dir / old_path.parent.name / old_path.name
+        new_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(old_path, new_path)
+    for i in valid_idx.flat:
+        old_path: Path = image_paths[i]
+        new_path = valid_dir / old_path.parent.name / old_path.name
+        new_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(old_path, new_path)
+
+    # --
 
     # Fetch label names, and a map from names to indices.
     label_names, label_to_index = process_labels(train_dir)
 
-    # Prepare batched training dataset.
+    # Prepare batched training and validation datasets.
     train_batches, train_count = batched_dataset(train_dir, label_to_index)
+    valid_batches, valid_count = batched_dataset(valid_dir, label_to_index)
 
     # Load a pre-trained base model to use for feature extraction.
     base_model = VGG16(include_top=False, weights="imagenet", pooling="max")
@@ -99,7 +140,13 @@ if __name__ == "__main__":
     # Create model by stacking a prediction layer on top of the base model.
     prediction_layer = keras.layers.Dense(1)
     model = keras.Sequential([base_model, prediction_layer])
-    model.compile(optimizer=RMSprop(lr=0.0005), loss="binary_crossentropy", metrics=["accuracy"])
+
+    # Prepare optimizer, loss function, and metrics.
+    optimizer = RMSprop(lr=0.0005)
+    loss = "binary_crossentropy"
+    metrics = ["accuracy"]
+
+    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
     model.summary()
 
     print("\nEvaluating model before training...")
@@ -114,7 +161,10 @@ if __name__ == "__main__":
     steps_per_epoch = train_count // BATCH_SIZE
 
     history = model.fit(
-        train_batches.repeat(), epochs=initial_epochs, steps_per_epoch=steps_per_epoch
+        train_batches.repeat(),
+        validation_data=valid_batches,
+        epochs=initial_epochs,
+        steps_per_epoch=steps_per_epoch,
     )
 
     # Prepare batched test dataset.
