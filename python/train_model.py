@@ -1,3 +1,4 @@
+import random
 import shutil
 
 from datetime import datetime
@@ -14,23 +15,41 @@ from tensorflow.keras.optimizers import RMSprop
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 BATCH_SIZE = 32
+IMAGE_SIZE = 224
 
 
 def preprocess_image(image):
     image = tf.io.decode_png(image, channels=3)
-    image = tf.image.resize_with_pad(image, 224, 224)
-    image /= 255.0
+    image = tf.image.convert_image_dtype(image, tf.float32)
+    image = tf.image.resize_with_pad(image, IMAGE_SIZE, IMAGE_SIZE)
 
     return image
 
 
-def load_and_preprocess_image(path, label=None):
+def load_and_preprocess_image(path, *args):
     image = tf.io.read_file(path)
     image = preprocess_image(image)
 
-    if label is None:
-        return image
-    return image, label
+    return (image, *args)
+
+
+def augment_image(image, *args):
+    # Random flipping.
+    image = tf.image.random_flip_left_right(image)
+
+    # Random rotation in increments of 90 degrees.
+    rot_k = tf.random.uniform([1], minval=0, maxval=4, dtype=tf.int32)
+    image = tf.image.rot90(image, k=rot_k[0])
+
+    # Random light distortion.
+    image = tf.image.random_brightness(image, 0.1)
+    image = tf.image.random_contrast(image, 0.9, 1.1)
+    image = tf.image.random_saturation(image, 0.9, 1.1)
+
+    # Ensure image is still valid.
+    image = tf.clip_by_value(image, 0.0, 1.0)
+
+    return (image, *args)
 
 
 def image_paths(path):
@@ -40,37 +59,6 @@ def image_paths(path):
         image_paths.append(str(file))
 
     return image_paths
-
-
-def image_paths_and_labels(path, label_to_index):
-    image_paths = []
-    image_labels = []
-
-    for file in sorted(path.rglob("*.png")):
-        image_paths.append(str(file))
-        image_labels.append(label_to_index[file.parent.name])
-
-    return image_paths, image_labels
-
-
-def batched_dataset(source_dir, label_to_index=None, shuffle=True):
-    if label_to_index is None:
-        paths = image_paths(source_dir)
-        dataset = tf.data.Dataset.from_tensor_slices((paths))
-    else:
-        paths, labels = image_paths_and_labels(source_dir, label_to_index)
-        dataset = tf.data.Dataset.from_tensor_slices((paths, labels))
-
-    dataset = dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
-    count = len(paths)
-
-    if shuffle:
-        dataset = dataset.shuffle(count)
-
-    dataset = dataset.batch(BATCH_SIZE)
-    dataset = dataset.prefetch(AUTOTUNE)
-
-    return dataset, count
 
 
 def process_labels(source_dir):
@@ -89,49 +77,38 @@ if __name__ == "__main__":
     train_dir: Path = data_dir / "train"
     test_dir: Path = data_dir / "test"
 
-    # Split training data into training and validation sets.
-    # TODO: Find a better way of doing this.
-    orig_train_dir = train_dir
-    train_dir = train_dir.with_name("train-tmp")
-    valid_dir = data_dir / "valid-tmp"
-
-    shutil.rmtree(train_dir, ignore_errors=True)
-    shutil.rmtree(valid_dir, ignore_errors=True)
-
-    train_dir.mkdir(exist_ok=True)
-    valid_dir.mkdir(exist_ok=True)
-
-    image_paths = list(orig_train_dir.rglob("*.png"))
-    image_count = len(image_paths)
-    train_count = round(image_count * 0.85)
-    valid_count = image_count - train_count
-
-    shuff_idx = np.random.permutation(image_count)
-    train_idx = shuff_idx[:train_count]
-    valid_idx = shuff_idx[train_count:]
-
-    assert train_count == len(train_idx)
-    assert valid_count == len(valid_idx)
-
-    for i in train_idx.flat:
-        old_path: Path = image_paths[i]
-        new_path = train_dir / old_path.parent.name / old_path.name
-        new_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(old_path, new_path)
-    for i in valid_idx.flat:
-        old_path: Path = image_paths[i]
-        new_path = valid_dir / old_path.parent.name / old_path.name
-        new_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(old_path, new_path)
-
-    # --
-
     # Fetch label names, and a map from names to indices.
     label_names, label_to_index = process_labels(train_dir)
+    print(label_to_index)
 
-    # Prepare batched training and validation datasets.
-    train_batches, train_count = batched_dataset(train_dir, label_to_index)
-    valid_batches, valid_count = batched_dataset(valid_dir, label_to_index)
+    train_files = sorted([str(file) for file in train_dir.rglob("*.png")])
+    train_files = list(filter(lambda p: p.find("sediment") < 0, train_files))
+
+    # Make the splitting reproducible.
+    random.seed(42)
+    random.shuffle(train_files)
+
+    # Read labels based on directory structure convention.
+    train_labels = [label_to_index[Path(file).parent.name] for file in train_files]
+
+    # Split training data into training and validation sets.
+    split = round(0.85 * len(train_files))
+    valid_files, valid_labels = train_files[split:], train_labels[split:]
+    train_files, train_labels = train_files[:split], train_labels[:split]
+
+    # Prepare training and validation datasets.
+    train_dataset = tf.data.Dataset.from_tensor_slices((train_files, train_labels))
+    train_dataset = train_dataset.shuffle(len(train_files))
+    train_dataset = train_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+    train_dataset = train_dataset.map(augment_image, num_parallel_calls=AUTOTUNE)
+    train_dataset = train_dataset.batch(BATCH_SIZE)
+    train_dataset = train_dataset.prefetch(AUTOTUNE)
+
+    valid_dataset = tf.data.Dataset.from_tensor_slices((valid_files, valid_labels))
+    valid_dataset = valid_dataset.shuffle(len(valid_files))
+    valid_dataset = valid_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+    valid_dataset = valid_dataset.batch(BATCH_SIZE)
+    valid_dataset = valid_dataset.prefetch(AUTOTUNE)
 
     # Load a pre-trained base model to use for feature extraction.
     base_model = VGG16(include_top=False, weights="imagenet", pooling="max")
@@ -150,28 +127,37 @@ if __name__ == "__main__":
     model.summary()
 
     print("\nEvaluating model before training...")
-    loss0, accuracy0 = model.evaluate(train_batches)
+    loss0, accuracy0 = model.evaluate(train_dataset)
     print("initial loss: {:.2f}".format(loss0))
     print("initial accuracy: {:.2f}".format(accuracy0))
 
     print("\nTraining model...")
 
     # Initial training parameters.
-    initial_epochs = 50
-    steps_per_epoch = train_count // BATCH_SIZE
+    initial_epochs = 100
+    steps_per_epoch = len(train_files) // BATCH_SIZE
 
     history = model.fit(
-        train_batches.repeat(),
-        validation_data=valid_batches,
+        train_dataset.repeat(),
+        validation_data=valid_dataset,
         epochs=initial_epochs,
         steps_per_epoch=steps_per_epoch,
     )
 
     # Prepare batched test dataset.
-    test_batches, _ = batched_dataset(test_dir, label_to_index, shuffle=False)
+    test_files = sorted([str(file) for file in test_dir.rglob("*.png")])
+    test_files = list(filter(lambda p: p.find("sediment") < 0, test_files))
+    test_labels = [label_to_index[Path(file).parent.name] for file in test_files]
+
+    # Prepare training and validation datasets.
+    test_dataset = tf.data.Dataset.from_tensor_slices((test_files, test_labels))
+    test_dataset = test_dataset.shuffle(len(test_files))
+    test_dataset = test_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+    test_dataset = test_dataset.batch(BATCH_SIZE)
+    test_dataset = test_dataset.prefetch(AUTOTUNE)
 
     print("\nEvaluating model after training...")
-    loss, accuracy = model.evaluate(test_batches)
+    loss, accuracy = model.evaluate(test_dataset)
     print("final loss: {:.2f}".format(loss))
     print("final accuracy: {:.2f}".format(accuracy))
 
