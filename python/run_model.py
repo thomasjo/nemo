@@ -1,12 +1,19 @@
+import shutil
+
 from datetime import datetime
 from pathlib import Path
-from shutil import copy2
 
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow.keras as keras
 
-from train_model import batched_dataset, image_paths, process_labels
+from train_model import load_and_preprocess_image
+
+# Used for auto-tuning dataset prefetch size, etc.
+AUTOTUNE = tf.data.experimental.AUTOTUNE
+BATCH_SIZE = 32
+IMAGE_SIZE = 224
+
 
 if __name__ == "__main__":
     file_dir = Path(__file__).parent.resolve()
@@ -14,43 +21,40 @@ if __name__ == "__main__":
 
     # TODO: Make these configurable?
     data_dir = root_dir / "data"
-    test_dir = data_dir / "test-new"
-
-    label_names, label_to_index = process_labels(test_dir)
-    test_batches, _ = batched_dataset(test_dir, label_to_index, shuffle=False)
-
+    mixed_dir = data_dir / "test-mixed"
     output_dir = root_dir / "output"
+
+    # Load trained model.
     model_file = output_dir / "nemo.h5"
-    model = keras.models.load_model(str(model_file))
+    model = keras.models.load_model(str(model_file), compile=False)
     model.summary()
 
-    loss, accuracy = model.evaluate(test_batches)
-    print("loss: {:.2f}".format(loss))
-    print("accuracy: {:.2f}".format(accuracy))
+    # Prepare training and validation datasets.
+    mixed_files = sorted([str(file) for file in mixed_dir.rglob("*.png")])
+    mixed_dataset = tf.data.Dataset.from_tensor_slices(mixed_files)
+    mixed_dataset = mixed_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+    mixed_dataset = mixed_dataset.batch(BATCH_SIZE)
+    mixed_dataset = mixed_dataset.prefetch(AUTOTUNE)
 
-    # --
-    print()
-    print()
-
-    mixed_dir = data_dir / "test-mixed"
-    mixed_paths = image_paths(mixed_dir)
-    mixed_batches, mixed_count = batched_dataset(mixed_dir, shuffle=False)
-
-    predictions = model.predict(mixed_batches)
-    predictions[predictions >= 0] = 1
-    predictions[predictions < 0] = 0
+    predictions = model.predict(mixed_dataset)
+    predictions[predictions >= 0] = 1  # planktic
+    predictions[predictions < 0] = 0   # benthic
     predictions = predictions.astype(int)
 
-    output_dir = root_dir / "output" / "predictions"
+    result_dir = root_dir / "output" / "predictions"
+    shutil.rmtree(result_dir, ignore_errors=True)
+    result_dir.mkdir(parents=True)
 
+    # TODO: Create this by convention or some such.
+    label_names = ["benthic", "planktic"]
     label_dirs = {}
     for label_name in label_names:
-        label_dir = output_dir / label_name
+        label_dir = result_dir / label_name
         label_dir.mkdir(parents=True, exist_ok=True)
         label_dirs[label_name] = label_dir
 
-    for i in range(mixed_count):
-        image_path = mixed_paths[i]
+    for i, image_path in enumerate(mixed_files):
+        image_path = mixed_files[i]
         image_file = Path(image_path)
 
         label = predictions[i, 0]
