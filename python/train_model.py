@@ -1,5 +1,4 @@
 import random
-import shutil
 
 from datetime import datetime
 from pathlib import Path
@@ -34,12 +33,12 @@ def load_and_preprocess_image(path, *args):
 
 
 def augment_image(image, *args):
-    # Random flipping.
+    # Random horizontal flipping.
     image = tf.image.random_flip_left_right(image)
 
     # Random rotation in increments of 90 degrees.
-    rot_k = tf.random.uniform([1], minval=0, maxval=4, dtype=tf.int32)
-    image = tf.image.rot90(image, k=rot_k[0])
+    rot_k = tf.random.uniform([], minval=0, maxval=4, dtype=tf.int32)
+    image = tf.image.rot90(image, k=rot_k)
 
     # Random light distortion.
     image = tf.image.random_brightness(image, 0.1)
@@ -113,13 +112,15 @@ if __name__ == "__main__":
     # Load a pre-trained base model to use for feature extraction.
     base_model = VGG16(include_top=False, weights="imagenet", pooling="max")
     base_model.trainable = False
+    base_model.summary()
 
     # Create model by stacking a prediction layer on top of the base model.
     prediction_layer = keras.layers.Dense(1)
     model = keras.Sequential([base_model, prediction_layer])
 
     # Prepare optimizer, loss function, and metrics.
-    optimizer = RMSprop(lr=0.0005)
+    base_learning_rate = 0.0005
+    optimizer = RMSprop(lr=base_learning_rate)
     loss = "binary_crossentropy"
     metrics = ["accuracy"]
 
@@ -167,4 +168,6 @@ if __name__ == "__main__":
     timestamp = datetime.utcnow()
     timestamp = timestamp.strftime("%Y%m%d%H%M")
     model_file = output_dir / "nemo-{}-{:.2f}.h5".format(timestamp, accuracy)
-    model.save(str(model_file), include_optimizer=False)
+    model.save(str(model_file))
+
+    # TODO: Implement model fine-tuning.
