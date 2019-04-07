@@ -43,6 +43,7 @@ def augment_image(image, *args):
     # Random light distortion.
     image = tf.image.random_brightness(image, 0.1)
     image = tf.image.random_contrast(image, 0.9, 1.1)
+    image = tf.image.random_hue(image, 0.05)
     image = tf.image.random_saturation(image, 0.9, 1.1)
 
     # Ensure image is still valid.
