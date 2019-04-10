@@ -111,13 +111,14 @@ if __name__ == "__main__":
     valid_dataset = valid_dataset.prefetch(AUTOTUNE)
 
     # Load a pre-trained base model to use for feature extraction.
-    base_model = VGG16(include_top=False, weights="imagenet", pooling="max")
+    base_model = VGG16(include_top=False, weights="imagenet")
     base_model.trainable = False
     base_model.summary()
 
     # Create model by stacking a prediction layer on top of the base model.
+    pooling_layer = keras.layers.GlobalMaxPooling2D()
     prediction_layer = keras.layers.Dense(1)
-    model = keras.Sequential([base_model, prediction_layer])
+    model = keras.Sequential([base_model, pooling_layer, prediction_layer])
 
     # Prepare optimizer, loss function, and metrics.
     base_learning_rate = 0.0005
