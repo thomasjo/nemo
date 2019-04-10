@@ -1,5 +1,0 @@
-{
-  "python.sortImports.args": [
-    "-sp ${workspaceFolder}/python"
-  ],
-}

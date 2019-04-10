@@ -1,3 +1,6 @@
+.vscode/
+
+# Project-specific.
 /data/
 /output/
 /tmp/
