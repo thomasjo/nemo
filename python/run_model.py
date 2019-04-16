@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     predictions = model.predict(mixed_dataset)
     predictions[predictions >= 0] = 1  # planktic
-    predictions[predictions < 0] = 0   # benthic
+    predictions[predictions < 0] = 0  # benthic
     predictions = predictions.astype(int)
 
     result_dir = root_dir / "output" / "predictions"
