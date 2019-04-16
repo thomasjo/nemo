@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     # Initial training parameters.
     initial_epochs = 100
-    steps_per_epoch = len(train_files) // BATCH_SIZE
+    steps_per_epoch = (len(train_files) // BATCH_SIZE) * 4
 
     history = model.fit(
         train_dataset.repeat(),
