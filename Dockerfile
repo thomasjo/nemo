@@ -27,6 +27,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python3
 
 # Install required Python 3 packages.
 RUN pip3 install --no-cache-dir \
+    docopt \
     h5py \
     imageio \
     matplotlib \
