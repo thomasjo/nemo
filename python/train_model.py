@@ -126,6 +126,7 @@ if __name__ == "__main__":
     model = keras.Sequential()
     model.add(base_model)
     model.add(keras.layers.GlobalMaxPooling2D())
+    model.add(keras.layers.Dense(64, activation="relu"))
     model.add(keras.layers.Dense(2, activation="softmax"))
 
     # Prepare optimizer, loss function, and metrics.
