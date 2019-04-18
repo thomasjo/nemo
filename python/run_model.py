@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
 
@@ -37,9 +38,7 @@ if __name__ == "__main__":
     mixed_dataset = mixed_dataset.prefetch(AUTOTUNE)
 
     predictions = model.predict(mixed_dataset)
-    predictions[predictions >= 0] = 1  # planktic
-    predictions[predictions < 0] = 0  # benthic
-    predictions = predictions.astype(int)
+    predictions = np.argmax(predictions, axis=1)
 
     result_dir = root_dir / "output" / "predictions"
     shutil.rmtree(result_dir, ignore_errors=True)
@@ -57,7 +56,7 @@ if __name__ == "__main__":
         image_path = mixed_files[i]
         image_file = Path(image_path)
 
-        label = predictions[i, 0]
+        label = predictions[i]
         label_name = label_names[label]
 
         target_file = label_dirs[label_name] / image_file.name

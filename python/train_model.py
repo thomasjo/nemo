@@ -79,10 +79,15 @@ if __name__ == "__main__":
 
     # Fetch label names, and a map from names to indices.
     label_names, label_to_index = process_labels(train_dir)
+    num_classes = len(label_names)
+
     print(label_to_index)
 
     train_files = sorted([str(file) for file in train_dir.rglob("*.png")])
+
+    # NOTE: Temporarily filter out "sediment" class.
     train_files = list(filter(lambda p: p.find("sediment") < 0, train_files))
+    num_classes = num_classes - 1
 
     # Make the splitting reproducible.
     random.seed(42)
@@ -90,6 +95,7 @@ if __name__ == "__main__":
 
     # Read labels based on directory structure convention.
     train_labels = [label_to_index[Path(file).parent.name] for file in train_files]
+    train_labels = keras.utils.to_categorical(train_labels, num_classes)
 
     # Split training data into training and validation sets.
     split = round(0.85 * len(train_files))
@@ -120,12 +126,12 @@ if __name__ == "__main__":
     model = keras.Sequential()
     model.add(base_model)
     model.add(keras.layers.GlobalMaxPooling2D())
-    model.add(keras.layers.Dense(1))
+    model.add(keras.layers.Dense(2, activation="softmax"))
 
     # Prepare optimizer, loss function, and metrics.
     base_learning_rate = 0.0005
     optimizer = RMSprop(lr=base_learning_rate)
-    loss = "binary_crossentropy"
+    loss = "categorical_crossentropy"
     metrics = ["accuracy"]
 
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
@@ -151,8 +157,10 @@ if __name__ == "__main__":
 
     # Prepare batched test dataset.
     test_files = sorted([str(file) for file in test_dir.rglob("*.png")])
+    # NOTE: Temporarily filter out "sediment" class.
     test_files = list(filter(lambda p: p.find("sediment") < 0, test_files))
     test_labels = [label_to_index[Path(file).parent.name] for file in test_files]
+    test_labels = keras.utils.to_categorical(test_labels, num_classes)
 
     # Prepare training and validation datasets.
     test_dataset = tf.data.Dataset.from_tensor_slices((test_files, test_labels))
