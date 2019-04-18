@@ -111,7 +111,8 @@ if __name__ == "__main__":
     valid_dataset = valid_dataset.prefetch(AUTOTUNE)
 
     # Load a pre-trained base model to use for feature extraction.
-    base_model = VGG16(include_top=False, weights="imagenet")
+    input_shape = (IMAGE_SIZE, IMAGE_SIZE, 3)
+    base_model = VGG16(include_top=False, weights="imagenet", input_shape=input_shape)
     base_model.trainable = False
     base_model.summary()
 
