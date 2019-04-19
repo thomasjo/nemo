@@ -10,8 +10,6 @@ from pathlib import Path
 
 from docopt import docopt
 
-import numpy as np
-import tensorflow as tf
 import tensorflow.keras as keras
 
 

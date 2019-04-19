@@ -3,12 +3,9 @@ import random
 from datetime import datetime
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
 
-from tensorflow.keras.applications import VGG16
 from tensorflow.keras.optimizers import RMSprop
 
 # Used for auto-tuning dataset prefetch size, etc.

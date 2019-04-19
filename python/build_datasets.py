@@ -1,5 +1,3 @@
-import itertools
-import random
 import shutil
 
 from pathlib import Path

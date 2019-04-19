@@ -3,9 +3,7 @@ import shutil
 from pathlib import Path
 
 import cv2 as cv
-import imageio
 import numpy as np
-import skimage.segmentation as segmentation
 
 
 def _output_path(orig_path, suffix=None):
