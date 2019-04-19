@@ -49,15 +49,6 @@ def augment_image(image, *args):
     return (image, *args)
 
 
-def image_paths(path):
-    image_paths = []
-
-    for file in sorted(path.rglob("*.png")):
-        image_paths.append(str(file))
-
-    return image_paths
-
-
 def process_labels(source_dir):
     label_names = sorted(path.name for path in source_dir.glob("*/") if path.is_dir())
     label_to_index = dict((name, index) for index, name in enumerate(label_names))
@@ -77,7 +68,6 @@ if __name__ == "__main__":
 
     # Fetch label names, and a map from names to indices.
     label_names, label_to_index = process_labels(train_dir)
-    print(label_to_index)
 
     train_files = sorted([str(file) for file in train_dir.rglob("*.png")])
     train_files = list(filter(lambda p: p.find("sediment") < 0, train_files))
@@ -129,11 +119,6 @@ if __name__ == "__main__":
 
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
     model.summary()
-
-    # print("\nEvaluating model before training...")
-    # loss0, accuracy0 = model.evaluate(train_dataset)
-    # print("initial loss: {:.2f}".format(loss0))
-    # print("initial accuracy: {:.2f}".format(accuracy0))
 
     print("Fine-tuning model...")
 

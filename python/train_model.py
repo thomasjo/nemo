@@ -50,15 +50,6 @@ def augment_image(image, *args):
     return (image, *args)
 
 
-def image_paths(path):
-    image_paths = []
-
-    for file in sorted(path.rglob("*.png")):
-        image_paths.append(str(file))
-
-    return image_paths
-
-
 def process_labels(source_dir):
     label_names = sorted(path.name for path in source_dir.glob("*/") if path.is_dir())
     label_to_index = dict((name, index) for index, name in enumerate(label_names))
@@ -79,10 +70,7 @@ if __name__ == "__main__":
     label_names, label_to_index = process_labels(train_dir)
     num_classes = len(label_names)
 
-    print(label_to_index)
-
     train_files = sorted([str(file) for file in train_dir.rglob("*.png")])
-
     # NOTE: Temporarily filter out "sediment" class.
     train_files = list(filter(lambda p: p.find("sediment") < 0, train_files))
     num_classes = num_classes - 1
