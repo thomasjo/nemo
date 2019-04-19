@@ -8,9 +8,9 @@ Options:
 
 from pathlib import Path
 
-from docopt import docopt
-
 import tensorflow.keras as keras
+
+from docopt import docopt
 
 
 def extract_weights(model_file, output_file):
