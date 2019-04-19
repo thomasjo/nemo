@@ -1,5 +1,4 @@
 import shutil
-
 from pathlib import Path
 
 LABEL_PREFIXES = {
@@ -43,7 +42,7 @@ def is_test_file(name):
 
 if __name__ == "__main__":
     file_dir: Path = Path(__file__).parent.resolve()
-    root_dir = file_dir.parent
+    root_dir = file_dir.parent.parent
 
     # TODO: Make these configurable?
     data_dir = root_dir / "data"

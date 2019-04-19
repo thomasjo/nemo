@@ -1,5 +1,4 @@
 import shutil
-
 from pathlib import Path
 
 import cv2 as cv
@@ -34,18 +33,6 @@ def binary(image, blur_size, threshold=127):
 
     image = blur(image, blur_size)
     _, image = cv.threshold(image, threshold, 255, cv.THRESH_BINARY)
-
-    return image
-
-
-def adaptive_gaussian(image):
-    if image.ndim == 3:
-        image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-
-    image = blur(image)
-    image = cv.adaptiveThreshold(
-        image, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2
-    )
 
     return image
 

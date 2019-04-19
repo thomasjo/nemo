@@ -7,6 +7,6 @@ force_grid_wrap = 0
 include_trailing_comma = true
 known_third_party = "cv2,docopt,numpy,tensorflow"
 line_length = 99
-lines_between_types = 1
+lines_between_types = 0
 multi_line_output = 3
 use_parentheses = true

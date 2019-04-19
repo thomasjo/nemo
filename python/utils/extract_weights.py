@@ -9,7 +9,6 @@ Options:
 from pathlib import Path
 
 import tensorflow.keras as keras
-
 from docopt import docopt
 
 
