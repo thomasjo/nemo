@@ -8,7 +8,7 @@ Options:
 
 from pathlib import Path
 
-import tensorflow.keras as keras
+import tensorflow.python.keras as keras
 from docopt import docopt
 
 

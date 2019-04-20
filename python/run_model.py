@@ -3,9 +3,9 @@ from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
-import tensorflow.keras as keras
+import tensorflow.python.keras as keras
 
-from train_model import load_and_preprocess_image
+from images import load_and_preprocess_image
 
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE

@@ -2,8 +2,10 @@ from datetime import datetime
 from pathlib import Path
 
 import tensorflow as tf
-import tensorflow.keras as keras
-from tensorflow.keras.optimizers import RMSprop
+from tensorflow.python import keras
+from tensorflow.python.keras.losses import CategoricalCrossentropy
+from tensorflow.python.keras.metrics import CategoricalAccuracy
+from tensorflow.python.keras.optimizers import RMSprop
 
 from datasets import load_datasets
 
@@ -25,23 +27,19 @@ if __name__ == "__main__":
     model_file = output_dir / "nemo.h5"
     model = keras.models.load_model(str(model_file), compile=False)
 
-    # Prepare optimizer, loss function, and metrics.
-    base_learning_rate = 0.00001
-    optimizer = RMSprop(lr=base_learning_rate)
-    loss = "binary_crossentropy"
-    metrics = ["accuracy"]
-
     # Only fine-tune the last few layers of the base model.
     base_model = model.layers[0]
-    for layer in base_model.layers[:-4]:
+    for layer in base_model.layers[:15]:
         layer.trainable = False
-    for layer in base_model.layers:
-        print(layer.name, layer.trainable)
+
+    # Prepare optimizer, loss function, and metrics.
+    learning_rate = 0.00001
+    optimizer = RMSprop(lr=learning_rate)
+    loss = CategoricalCrossentropy()
+    metrics = [CategoricalAccuracy()]
 
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
     model.summary()
-
-    print("Fine-tuning model...")
 
     # Initial training parameters.
     initial_epochs = 25
@@ -49,6 +47,8 @@ if __name__ == "__main__":
     total_epochs = initial_epochs + fine_tune_epochs
     steps_per_epoch = metadata.train_count // BATCH_SIZE
     steps_per_epoch *= 4  # Increase steps because of image augmentations
+
+    print("Fine-tuning model...")
 
     history = model.fit(
         train_dataset.repeat(),

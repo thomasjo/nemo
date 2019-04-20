@@ -2,9 +2,12 @@ from datetime import datetime
 from pathlib import Path
 
 import tensorflow as tf
-import tensorflow.keras as keras
-from tensorflow.keras.applications import VGG16
-from tensorflow.keras.optimizers import RMSprop
+from tensorflow.python import keras
+from tensorflow.python.keras.applications import VGG16
+from tensorflow.python.keras.layers import Dense, GlobalMaxPooling2D
+from tensorflow.python.keras.losses import CategoricalCrossentropy
+from tensorflow.python.keras.metrics import CategoricalAccuracy
+from tensorflow.python.keras.optimizers import RMSprop
 
 from datasets import load_datasets
 
@@ -26,15 +29,15 @@ if __name__ == "__main__":
     # Create model by stacking a prediction layer on top of the base model.
     model = keras.Sequential()
     model.add(base_model)
-    model.add(keras.layers.GlobalMaxPooling2D())
-    model.add(keras.layers.Dense(64, activation="relu"))
-    model.add(keras.layers.Dense(2, activation="softmax"))
+    model.add(GlobalMaxPooling2D())
+    model.add(Dense(64, activation="relu"))
+    model.add(Dense(2, activation="softmax"))
 
     # Prepare optimizer, loss function, and metrics.
-    base_learning_rate = 0.0005
-    optimizer = RMSprop(lr=base_learning_rate)
-    loss = "categorical_crossentropy"
-    metrics = ["accuracy"]
+    learning_rate = 0.0005
+    optimizer = RMSprop(lr=learning_rate)
+    loss = CategoricalCrossentropy()
+    metrics = [CategoricalAccuracy()]
 
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
     model.summary()
@@ -64,7 +67,7 @@ if __name__ == "__main__":
 
     # Initialize output directory.
     # NOTE: Make this configurable?
-    file_dir: Path = Path(__file__).parent.resolve()
+    file_dir = Path(__file__).parent.resolve()
     root_dir = file_dir.parent
     output_dir = root_dir / "output"
     output_dir.mkdir(parents=True, exist_ok=True)

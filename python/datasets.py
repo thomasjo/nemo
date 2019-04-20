@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import tensorflow as tf
-from tensorflow import keras
+from tensorflow.python import keras
 
 from images import augment_image, load_and_preprocess_image
 
