@@ -19,7 +19,7 @@ def random_seed(seed):
 
 
 def _root_dir():
-    file_dir: Path = Path(__file__).parent.resolve()
+    file_dir = Path(__file__).parent.resolve()
     root_dir = file_dir.parent
     return root_dir
 
@@ -36,8 +36,8 @@ def process_labels(source_dir):
 
 
 def load_datasets():
-    data_dir = _root_dir()
-    # TODO: Make these configurable?
+    # TODO: Make these configurable/arguments?
+    data_dir = _data_dir()
     train_dir: Path = data_dir / "train"
     test_dir: Path = data_dir / "test"
 
