@@ -5,8 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 black = "*"
-isort = "*"
 flake8 = "*"
+isort = "*"
 jedi = "*"
 
 [packages]
@@ -17,8 +17,8 @@ matplotlib = "*"
 numpy = "*"
 pandas = "*"
 pyyaml = "*"
-scikit-learn = "*"
 scikit-image = "*"
+scikit-learn = "*"
 scipy = "*"
 tensorflow-gpu = "==2.0.0a0"
 tensorflow-hub = "*"
