@@ -1,4 +1,6 @@
 import random
+from collections import namedtuple
+from contextlib import contextmanager
 from pathlib import Path
 
 import tensorflow as tf
@@ -91,10 +93,7 @@ def load_datasets():
     test_dataset = test_dataset.batch(BATCH_SIZE)
     test_dataset = test_dataset.prefetch(AUTOTUNE)
 
-    metadata = {
-        "train_count": len(train_files),
-        "valid_count": len(valid_files),
-        "test_count": len(test_files),
-    }
+    Metadata = namedtuple("Metadata", ["train_count", "valid_count", "test_count"])
+    metadata = Metadata(len(train_files), len(valid_files), len(test_files))
 
     return train_dataset, valid_dataset, test_dataset, metadata
