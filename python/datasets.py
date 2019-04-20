@@ -46,6 +46,7 @@ def load_datasets():
     # Fetch label names, and a map from names to indices.
     labels = process_labels(train_dir)
     num_classes = len(labels)
+    assert num_classes > 2
 
     train_files = sorted([str(file) for file in train_dir.rglob("*.png")])
     # NOTE: Temporarily filter out "sediment" class.
