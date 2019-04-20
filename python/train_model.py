@@ -47,7 +47,7 @@ if __name__ == "__main__":
     print("\nTraining model...")
 
     # Initial training parameters.
-    initial_epochs = 100
+    initial_epochs = 25
     steps_per_epoch = (metadata.train_count // BATCH_SIZE) * 4
 
     history = model.fit(
