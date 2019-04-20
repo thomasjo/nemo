@@ -1,0 +1,30 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+black = "*"
+isort = "*"
+flake8 = "*"
+jedi = "*"
+
+[packages]
+docopt = "*"
+h5py = "*"
+imageio = "*"
+matplotlib = "*"
+numpy = "*"
+pandas = "*"
+pyyaml = "*"
+scikit-learn = "*"
+scikit-image = "*"
+scipy = "*"
+tensorflow-gpu = "==2.0.0a0"
+tensorflow-hub = "*"
+
+[requires]
+python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true
