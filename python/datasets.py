@@ -62,6 +62,7 @@ def load_datasets():
     train_labels = keras.utils.to_categorical(train_labels, num_classes)
 
     # Split training data into training and validation sets.
+    # TODO: Make split configurable.
     split = round(0.85 * len(train_files))
     valid_files, valid_labels = train_files[split:], train_labels[split:]
     train_files, train_labels = train_files[:split], train_labels[:split]
@@ -70,6 +71,8 @@ def load_datasets():
     train_dataset = tf.data.Dataset.from_tensor_slices((train_files, train_labels))
     train_dataset = train_dataset.shuffle(len(train_files))
     train_dataset = train_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+
+    # TODO: Consider moving this block to call site.
     train_dataset = train_dataset.map(augment_image, num_parallel_calls=AUTOTUNE)
     train_dataset = train_dataset.batch(BATCH_SIZE)
     train_dataset = train_dataset.prefetch(AUTOTUNE)
@@ -77,6 +80,8 @@ def load_datasets():
     valid_dataset = tf.data.Dataset.from_tensor_slices((valid_files, valid_labels))
     valid_dataset = valid_dataset.shuffle(len(valid_files))
     valid_dataset = valid_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+
+    # TODO: Consider moving this block to call site.
     valid_dataset = valid_dataset.batch(BATCH_SIZE)
     valid_dataset = valid_dataset.prefetch(AUTOTUNE)
 
@@ -91,6 +96,8 @@ def load_datasets():
     test_dataset = tf.data.Dataset.from_tensor_slices((test_files, test_labels))
     test_dataset = test_dataset.shuffle(len(test_files))
     test_dataset = test_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+
+    # TODO: Consider moving this block to call site.
     test_dataset = test_dataset.batch(BATCH_SIZE)
     test_dataset = test_dataset.prefetch(AUTOTUNE)
 
