@@ -11,6 +11,13 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 BATCH_SIZE = 32
 
 
+@contextmanager
+def random_seed(seed):
+    old_state = random.getstate()
+    yield random.seed(seed)
+    random.setstate(old_state)
+
+
 def _root_dir():
     file_dir: Path = Path(__file__).parent.resolve()
     root_dir = file_dir.parent
@@ -43,9 +50,9 @@ def load_datasets():
     train_files = list(filter(lambda p: p.find("sediment") < 0, train_files))
     num_classes = num_classes - 1
 
-    # Make the splitting reproducible.
-    random.seed(42)
-    random.shuffle(train_files)
+    # Make the splitting reproducible by using a fixed seed.
+    with random_seed(42):
+        random.shuffle(train_files)
 
     # Read labels based on directory structure convention.
     train_labels = [labels[Path(file).parent.name] for file in train_files]
