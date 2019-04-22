@@ -31,7 +31,7 @@ if __name__ == "__main__":
     model.add(base_model)
     model.add(GlobalMaxPooling2D())
     model.add(Dense(64, activation="relu"))
-    model.add(Dense(2, activation="softmax"))
+    model.add(Dense(3, activation="softmax"))
 
     # Prepare optimizer, loss function, and metrics.
     learning_rate = 0.0005
