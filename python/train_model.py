@@ -2,12 +2,12 @@ from datetime import datetime
 from pathlib import Path
 
 import tensorflow as tf
-from tensorflow.python import keras
-from tensorflow.python.keras.applications import VGG16
-from tensorflow.python.keras.layers import Dense, GlobalMaxPooling2D
-from tensorflow.python.keras.losses import CategoricalCrossentropy
-from tensorflow.python.keras.metrics import CategoricalAccuracy
-from tensorflow.python.keras.optimizers import RMSprop
+from tensorflow import keras
+from tensorflow.keras.applications import VGG16
+from tensorflow.keras.layers import Dense, GlobalMaxPooling2D
+from tensorflow.keras.losses import CategoricalCrossentropy
+from tensorflow.keras.metrics import CategoricalAccuracy
+from tensorflow.keras.optimizers import RMSprop
 
 from datasets import load_datasets
 
