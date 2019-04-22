@@ -49,9 +49,6 @@ def load_datasets():
     assert num_classes > 2
 
     train_files = sorted([str(file) for file in train_dir.rglob("*.png")])
-    # NOTE: Temporarily filter out "sediment" class.
-    train_files = list(filter(lambda p: p.find("sediment") < 0, train_files))
-    num_classes = num_classes - 1
 
     # Make the splitting reproducible by using a fixed seed.
     with random_seed(42):
@@ -87,8 +84,8 @@ def load_datasets():
 
     # Prepare batched test dataset.
     test_files = sorted([str(file) for file in test_dir.rglob("*.png")])
-    # NOTE: Temporarily filter out "sediment" class.
-    test_files = list(filter(lambda p: p.find("sediment") < 0, test_files))
+
+    # Read labels based on directory structure convention.
     test_labels = [labels[Path(file).parent.name] for file in test_files]
     test_labels = keras.utils.to_categorical(test_labels, num_classes)
 
