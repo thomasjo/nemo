@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
-import tensorflow.python.keras as keras
+import tensorflow.keras as keras
 
 from images import load_and_preprocess_image
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     result_dir.mkdir(parents=True)
 
     # TODO: Create this by convention or some such.
-    label_names = ["benthic", "planktic"]
+    label_names = ["benthic", "planktic", "sediment"]
     label_dirs = {}
     for label_name in label_names:
         label_dir = result_dir / label_name
