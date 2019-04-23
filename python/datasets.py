@@ -1,6 +1,4 @@
-import random
 from collections import namedtuple
-from contextlib import contextmanager
 from pathlib import Path
 
 import tensorflow as tf
@@ -11,13 +9,6 @@ from images import augment_image, load_and_preprocess_image
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 BATCH_SIZE = 32
-
-
-@contextmanager
-def random_seed(seed):
-    old_state = random.getstate()
-    yield random.seed(seed)
-    random.setstate(old_state)
 
 
 def _root_dir():
@@ -31,42 +22,39 @@ def _data_dir():
     return data_dir
 
 
-def process_labels(source_dir):
-    labels = sorted(path.name for path in source_dir.glob("*/") if path.is_dir())
+def labels_for_dir(path):
+    labels = sorted(child.name for child in path.glob("*/") if child.is_dir())
     labels = dict((name, index) for index, name in enumerate(labels))
     return labels
+
+
+def dataset_from_dir(source_dir, label_lookup):
+    files = sorted([file for file in source_dir.rglob("*.png")])
+
+    # Extract labels based on directory structure convention.
+    labels = [label_lookup[file.parent.name] for file in files]
+    labels = keras.utils.to_categorical(labels, len(label_lookup))
+
+    # Tensors can't represent Path objects; use strings instead.
+    files = [str(file) for file in files]
+    dataset = tf.data.Dataset.from_tensor_slices((files, labels))
+
+    return dataset, len(files)
 
 
 def load_datasets():
     # TODO: Make these configurable/arguments?
     data_dir = _data_dir()
-    train_dir: Path = data_dir / "train"
-    test_dir: Path = data_dir / "test"
+    train_dir = data_dir / "train"
+    valid_dir = data_dir / "valid"
+    test_dir = data_dir / "test"
 
     # Fetch label names, and a map from names to indices.
-    labels = process_labels(train_dir)
-    num_classes = len(labels)
-    assert num_classes > 2
+    labels = labels_for_dir(train_dir)
 
-    train_files = sorted([str(file) for file in train_dir.rglob("*.png")])
-
-    # Make the splitting reproducible by using a fixed seed.
-    with random_seed(42):
-        random.shuffle(train_files)
-
-    # Read labels based on directory structure convention.
-    train_labels = [labels[Path(file).parent.name] for file in train_files]
-    train_labels = keras.utils.to_categorical(train_labels, num_classes)
-
-    # Split training data into training and validation sets.
-    # TODO: Make split configurable.
-    split = round(0.85 * len(train_files))
-    valid_files, valid_labels = train_files[split:], train_labels[split:]
-    train_files, train_labels = train_files[:split], train_labels[:split]
-
-    # Prepare training and validation datasets.
-    train_dataset = tf.data.Dataset.from_tensor_slices((train_files, train_labels))
-    train_dataset = train_dataset.shuffle(len(train_files))
+    # Prepare training dataset.
+    train_dataset, train_count = dataset_from_dir(train_dir, labels)
+    train_dataset = train_dataset.shuffle(train_count)
     train_dataset = train_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
 
     # TODO: Consider moving this block to call site.
@@ -74,24 +62,18 @@ def load_datasets():
     train_dataset = train_dataset.batch(BATCH_SIZE)
     train_dataset = train_dataset.prefetch(AUTOTUNE)
 
-    valid_dataset = tf.data.Dataset.from_tensor_slices((valid_files, valid_labels))
-    valid_dataset = valid_dataset.shuffle(len(valid_files))
+    # Prepare validation dataset.
+    valid_dataset, valid_count = dataset_from_dir(valid_dir, labels)
+    valid_dataset = valid_dataset.shuffle(valid_count)
     valid_dataset = valid_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
 
     # TODO: Consider moving this block to call site.
     valid_dataset = valid_dataset.batch(BATCH_SIZE)
     valid_dataset = valid_dataset.prefetch(AUTOTUNE)
 
-    # Prepare batched test dataset.
-    test_files = sorted([str(file) for file in test_dir.rglob("*.png")])
-
-    # Read labels based on directory structure convention.
-    test_labels = [labels[Path(file).parent.name] for file in test_files]
-    test_labels = keras.utils.to_categorical(test_labels, num_classes)
-
-    # Prepare training and validation datasets.
-    test_dataset = tf.data.Dataset.from_tensor_slices((test_files, test_labels))
-    test_dataset = test_dataset.shuffle(len(test_files))
+    # Prepare test dataset.
+    test_dataset, test_count = dataset_from_dir(test_dir, labels)
+    test_dataset = test_dataset.shuffle(test_count)
     test_dataset = test_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
 
     # TODO: Consider moving this block to call site.
@@ -99,6 +81,6 @@ def load_datasets():
     test_dataset = test_dataset.prefetch(AUTOTUNE)
 
     Metadata = namedtuple("Metadata", ["train_count", "valid_count", "test_count"])
-    metadata = Metadata(len(train_files), len(valid_files), len(test_files))
+    metadata = Metadata(train_count, valid_count, test_count)
 
     return train_dataset, valid_dataset, test_dataset, metadata

@@ -24,7 +24,7 @@ if __name__ == "__main__":
     input_shape = (IMAGE_SIZE, IMAGE_SIZE, 3)
     base_model = VGG16(include_top=False, weights="imagenet", input_shape=input_shape)
     base_model.trainable = False
-    base_model.summary()
+    # base_model.summary()
 
     # Create model by stacking a prediction layer on top of the base model.
     model = keras.Sequential()
@@ -35,12 +35,12 @@ if __name__ == "__main__":
 
     # Prepare optimizer, loss function, and metrics.
     learning_rate = 0.0005
-    optimizer = RMSprop(lr=learning_rate)
+    optimizer = RMSprop(learning_rate)
     loss = CategoricalCrossentropy()
     metrics = [CategoricalAccuracy()]
 
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
-    model.summary()
+    # model.summary()
 
     print("\nEvaluating model before training...")
     loss0, accuracy0 = model.evaluate(train_dataset)

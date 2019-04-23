@@ -16,7 +16,7 @@ IMAGE_SIZE = 224
 
 
 if __name__ == "__main__":
-    file_dir: Path = Path(__file__).parent.resolve()
+    file_dir = Path(__file__).parent.resolve()
     root_dir = file_dir.parent
 
     # TODO: Make these configurable?
@@ -34,12 +34,12 @@ if __name__ == "__main__":
 
     # Prepare optimizer, loss function, and metrics.
     learning_rate = 0.00001
-    optimizer = RMSprop(lr=learning_rate)
+    optimizer = RMSprop(learning_rate)
     loss = CategoricalCrossentropy()
     metrics = [CategoricalAccuracy()]
 
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
-    model.summary()
+    # model.summary()
 
     # Initial training parameters.
     initial_epochs = 25
