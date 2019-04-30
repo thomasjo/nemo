@@ -39,7 +39,7 @@ if __name__ == "__main__":
     loss = CategoricalCrossentropy()
     metrics = [CategoricalAccuracy()]
 
-    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+    model.compile(optimizer, loss, metrics)
     # model.summary()
 
     print("\nEvaluating model before training...")
