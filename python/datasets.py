@@ -80,7 +80,7 @@ def load_datasets():
     test_dataset = test_dataset.batch(BATCH_SIZE)
     test_dataset = test_dataset.prefetch(AUTOTUNE)
 
-    Metadata = namedtuple("Metadata", ["train_count", "valid_count", "test_count"])
-    metadata = Metadata(train_count, valid_count, test_count)
+    Metadata = namedtuple("Metadata", ["labels", "train_count", "valid_count", "test_count"])
+    metadata = Metadata(labels, train_count, valid_count, test_count)
 
     return train_dataset, valid_dataset, test_dataset, metadata

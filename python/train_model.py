@@ -19,6 +19,7 @@ IMAGE_SIZE = 224
 
 if __name__ == "__main__":
     train_dataset, valid_dataset, test_dataset, metadata = load_datasets()
+    num_classes = len(metadata.labels)
 
     # Load a pre-trained base model to use for feature extraction.
     input_shape = (IMAGE_SIZE, IMAGE_SIZE, 3)
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     model.add(base_model)
     model.add(GlobalMaxPooling2D())
     model.add(Dense(64, activation="relu"))
-    model.add(Dense(3, activation="softmax"))
+    model.add(Dense(num_classes, activation="softmax"))
 
     # Prepare optimizer, loss function, and metrics.
     learning_rate = 0.0005
