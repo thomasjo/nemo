@@ -3,6 +3,11 @@ FROM nvidia/cuda:10.0-cudnn7-runtime-ubuntu18.04
 # Ensure apt-get is in noninteractive mode during build.
 ARG DEBIAN_FRONTEND=interactive
 
+# Enforce UTF-8 encoding, needed by various components.
+ENV LC_ALL=C.UTF-8 LANG=C.UTF-8
+
+WORKDIR /tmp
+
 # Ensure all base packages are up-to-date.
 RUN apt-get update && apt-get upgrade --yes \
 &&  rm -rf /var/lib/apt/lists/*
@@ -25,28 +30,13 @@ RUN apt-get update && apt-get install --yes \
 # Install latest version of pip.
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3
 
-# Install required Python 3 packages.
-RUN pip3 install --no-cache-dir \
-    docopt \
-    h5py \
-    imageio \
-    matplotlib \
-    numpy \
-    pandas \
-    pyyaml \
-    scikit-image \
-    scikit-learn \
-    scipy
+# Install required Python 3 packages via Pipenv.
+RUN pip3 install --no-cache-dir pipenv
+ADD Pipfile* /tmp/
+RUN pipenv install --system --deploy
 
-# Install OpenCV with Python bindings.
-RUN apt-get update && apt-get install --yes \
-    python3-opencv \
-&&  rm -rf /var/lib/apt/lists/*
-
-# Install TensorFlow packages.
-RUN pip3 install --no-cache-dir \
-    tensorflow-hub \
-    tensorflow-gpu==2.0.0a0
-
+# Bundle executable project files.
 ADD bin/* /usr/local/bin/
 ADD python /root/python
+
+WORKDIR /root

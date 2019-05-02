@@ -1,11 +1,10 @@
 [tool.black]
 line_length = 99
-target_version = ["py37"]
+target_version = ["py36"]
 
 [tool.isort]
 force_grid_wrap = 0
 include_trailing_comma = true
-known_third_party = "cv2,docopt,numpy,tensorflow"
 line_length = 99
 lines_between_types = 0
 multi_line_output = 3
