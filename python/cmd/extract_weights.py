@@ -8,12 +8,12 @@ Options:
 
 from pathlib import Path
 
-import tensorflow.python.keras as keras
+import tensorflow.keras as keras
 from docopt import docopt
 
 
 def extract_weights(model_file, output_file):
-    model = keras.models.load_model(str(model_file))
+    model = keras.models.load_model(str(model_file), compile=False)
     model.save_weights(str(output_file))
 
     base_model = model.layers[0]
