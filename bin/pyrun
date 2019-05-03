@@ -1,8 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -eu
+
+args="$@"
 
 parent_dir=$(dirname $(readlink -f "$0"))
 root_dir=$(dirname $parent_dir)
 
-"${parent_dir}/run" python3 $*
+"${parent_dir}/run" python3 $args

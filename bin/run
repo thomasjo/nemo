@@ -1,9 +1,13 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
+set -eu
+
+args="$@"
 
 parent_dir=$(dirname $(readlink -f "$0"))
 root_dir=$(dirname $parent_dir)
 
-image_name="thomasjo/nemo"
+image_tag="thomasjo/nemo:latest"
 
 docker run --rm -it \
   --env TF_CPP_MIN_LOG_LEVEL="2" \
@@ -13,5 +17,5 @@ docker run --rm -it \
   --volume "${root_dir}/output:/root/output" \
   --volume "${root_dir}/python:/root/python:ro" \
   --workdir "/root" \
-  $image_name \
-  $*
+  $image_tag \
+  $args
