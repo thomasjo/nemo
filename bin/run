@@ -7,7 +7,7 @@ args="$@"
 parent_dir=$(dirname $(readlink -f "$0"))
 root_dir=$(dirname $parent_dir)
 
-image_tag="thomasjo/nemo:latest"
+image_tag="thomasjo/nemo:innvestigate"
 
 docker run --rm -it \
   --env TF_CPP_MIN_LOG_LEVEL="2" \

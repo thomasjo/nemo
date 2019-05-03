@@ -7,6 +7,6 @@ args="$@"
 parent_dir=$(dirname $(readlink -f "$0"))
 root_dir=$(dirname $parent_dir)
 
-image_tag="thomasjo/nemo:latest"
+image_tag="thomasjo/nemo:innvestigate"
 
 docker build --tag $image_tag $args "${root_dir}"
