@@ -6,7 +6,7 @@ IMAGE_SIZE = 224
 def preprocess_image(image):
     image = tf.io.decode_png(image, channels=3)
     image = tf.image.convert_image_dtype(image, tf.float32)
-    image = tf.image.resize_with_pad(image, IMAGE_SIZE, IMAGE_SIZE)
+    image = tf.image.resize_image_with_pad(image, IMAGE_SIZE, IMAGE_SIZE)
 
     return image
 
