@@ -9,11 +9,13 @@ Options:
 from pathlib import Path
 
 import innvestigate as inn
+import tensorflow.keras as keras
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from docopt import docopt
-from keras.applications.vgg16 import VGG16
+from tensorflow.keras.applications.vgg16 import VGG16
+from tensorflow.keras.layers import Dense, GlobalMaxPooling2D
 
 from datasets import dataset_from_dir, labels_for_dir, load_and_preprocess_image
 
@@ -36,6 +38,7 @@ if __name__ == "__main__":
 
     # Fetch label names, and a map from names to indices.
     labels = labels_for_dir(train_dir)
+    num_classes = len(labels)
 
     # Prepare training dataset.
     train_dataset, train_count = dataset_from_dir(train_dir, labels)
@@ -45,9 +48,18 @@ if __name__ == "__main__":
     # model_file = output_dir / "nemo.h5"
     # model = keras.models.load_model(str(model_file))
     input_shape = (IMAGE_SIZE, IMAGE_SIZE, 3)
-    model = VGG16(input_shape=input_shape, include_top=False, weights=str(weights_file))
+    # base_model = VGG16(input_shape=input_shape, include_top=False, weights=str(weights_file))
+    base_model = VGG16(input_shape=input_shape, include_top=False, weights=None)
+    base_model.load_weights(str(weights_file))
+
+    model = keras.Sequential()
+    model.add(base_model)
+    model.add(GlobalMaxPooling2D())
+    model.add(Dense(64, activation="relu"))
+    model.add(Dense(num_classes, activation="softmax"))
+    model.summary()
+
     # model.load_weights(str(weights_file))
-    # model.summary()
 
     ds_iter = train_dataset.take(1).make_one_shot_iterator()
     xy = ds_iter.get_next()

@@ -16,6 +16,8 @@ def extract_weights(model_file, output_file):
     model = keras.models.load_model(str(model_file), compile=False)
     model.save_weights(str(output_file))
 
+    print(model.to_yaml())
+
     base_model = model.layers[0]
     base_model.save_weights(str(output_file.with_suffix(".base.h5")))
 

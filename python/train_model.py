@@ -5,8 +5,8 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.applications import VGG16
 from tensorflow.keras.layers import Dense, GlobalMaxPooling2D
-from tensorflow.keras.losses import CategoricalCrossentropy
-from tensorflow.keras.metrics import CategoricalAccuracy
+from tensorflow.keras.losses import categorical_crossentropy
+from tensorflow.keras.metrics import categorical_accuracy
 from tensorflow.keras.optimizers import RMSprop
 
 from datasets import load_datasets
@@ -37,14 +37,14 @@ if __name__ == "__main__":
     # Prepare optimizer, loss function, and metrics.
     learning_rate = 0.0005
     optimizer = RMSprop(learning_rate)
-    loss = CategoricalCrossentropy()
-    metrics = [CategoricalAccuracy()]
+    loss = categorical_crossentropy
+    metrics = [categorical_accuracy]
 
     model.compile(optimizer, loss, metrics)
     # model.summary()
 
     print("\nEvaluating model before training...")
-    loss0, accuracy0 = model.evaluate(train_dataset)
+    loss0, accuracy0 = model.evaluate(train_dataset, steps=1)
     print("initial loss: {:.2f}".format(loss0))
     print("initial accuracy: {:.2f}".format(accuracy0))
 
@@ -56,9 +56,10 @@ if __name__ == "__main__":
 
     history = model.fit(
         train_dataset.repeat(),
-        validation_data=valid_dataset,
         epochs=initial_epochs,
         steps_per_epoch=steps_per_epoch,
+        validation_data=valid_dataset,
+        validation_steps=(metadata.valid_count // BATCH_SIZE),
     )
 
     print("\nEvaluating model after training...")
