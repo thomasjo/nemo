@@ -2,7 +2,9 @@
 
 set -eu
 
+args="$@"
+
 parent_dir=$(dirname $(readlink -f "$0"))
 root_dir=$(dirname $parent_dir)
 
-"${parent_dir}/pyrun" python/preprocess_data.py
+"${parent_dir}/pyrun" python/cmd/preprocess_data.py $args

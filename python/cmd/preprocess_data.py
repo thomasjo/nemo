@@ -1,8 +1,23 @@
+"""
+Usage:
+  preprocess_data.py [options] <source> <output>
+
+Options:
+  --border-threshold=<scalar>  Threshold used for border detection.
+                               [default: 70]
+  --object-threshold=<scalar>  Threshold used for object detection.
+                               [default: 120]
+  --image-margin=<pixels>      Margin outside the detection region.
+                               [default: 122]
+  -h, --help                   Show this screen.
+"""
+
 import shutil
 from pathlib import Path
 
 import cv2 as cv
 import numpy as np
+from docopt import docopt
 
 
 def _output_path(orig_path, suffix=None):
@@ -10,7 +25,7 @@ def _output_path(orig_path, suffix=None):
     if suffix:
         file_name = "{}-{}".format(file_name, suffix)
 
-    return processed_data_dir / "{}.png".format(file_name)
+    return output_dir / "{}.png".format(file_name)
 
 
 def _imread(path):
@@ -55,28 +70,32 @@ def _add_bbox(stats, image):
 
 
 if __name__ == "__main__":
-    data_dir = Path("/root/data")
-    raw_data_dir = data_dir / "raw"
-    processed_data_dir = data_dir / "processed"
+    args = docopt(__doc__)
+    source_dir = Path(args["<source>"])
+    output_dir = Path(args["<output>"])
+    border_threshold = int(args["--border-threshold"])
+    object_threshold = int(args["--object-threshold"])
+    image_margin = int(args["--image-margin"])
 
     # Recreate target directory on every execution.
-    shutil.rmtree(processed_data_dir, ignore_errors=True)
-    processed_data_dir.mkdir(parents=True)
+    shutil.rmtree(output_dir, ignore_errors=True)
+    output_dir.mkdir(parents=True)
 
-    print("Data directory:", data_dir)
+    print("Source directory:", source_dir)
     print("-" * 72)
 
     patch_dims = np.array([224, 224])
     patch_height, patch_width = patch_dims
 
-    for image_file in sorted(raw_data_dir.rglob("*.tiff")):
+    for image_file in sorted(source_dir.rglob("*.tiff")):
         print(image_file)
 
-        output_file = processed_data_dir / "{}.png".format(image_file.stem)
+        output_file = output_dir / "{}.png".format(image_file.stem)
+        image = _imread(image_file)
 
         # Binary mask for finding the "metal border".
-        image = _imread(image_file)
-        image_binary = binary(image, blur_size=75, threshold=70)
+        # TODO: Make blur size configurable?
+        image_binary = binary(image, blur_size=75, threshold=border_threshold)
 
         # Find the "metal border" component based on area.
         _, image_cc, stats, _ = cv.connectedComponentsWithStats(image_binary)
@@ -85,17 +104,18 @@ if __name__ == "__main__":
         border_label = np.argmax(stats[1:, cv.CC_STAT_AREA]) + 1
 
         # Binary mask used for finding objects.
-        image_binary = binary(image, blur_size=31, threshold=120)
+        # TODO: Make blur size configurable?
+        image_binary = binary(image, blur_size=31, threshold=object_threshold)
 
         # Remove the "metal border" from the object mask.
         image_binary[image_cc == border_label] = 0
 
         # Remove objects too close to the edges; they are likely to overlap with objects
         # in neighboring source images, so this approach should remove all duplicates.
-        image_binary[:patch_height] = 0
-        image_binary[-patch_height:-1] = 0
-        image_binary[:, :patch_width] = 0
-        image_binary[:, -patch_width:-1] = 0
+        image_binary[:image_margin] = 0
+        image_binary[-image_margin:-1] = 0
+        image_binary[:, :image_margin] = 0
+        image_binary[:, -image_margin:-1] = 0
 
         # Find all regions of interest.
         n_labels, image_cc, stats, centroids = cv.connectedComponentsWithStats(image_binary)
