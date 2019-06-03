@@ -1,6 +1,6 @@
 FROM nvidia/cuda:10.0-cudnn7-runtime-ubuntu18.04
 
-# Ensure apt-get is in noninteractive mode during build.
+# Ensure apt-get is in non-interactive mode during build.
 ARG DEBIAN_FRONTEND=interactive
 
 # Enforce UTF-8 encoding, needed by various components.
@@ -29,6 +29,12 @@ RUN apt-get update && apt-get install --yes \
 
 # Install latest version of pip.
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3
+
+# Install Python package dependencies.
+RUN apt-get update && apt-get install --yes \
+    libsm6 \
+    libxrender-dev \
+&&  rm -rf /var/lib/apt/lists/*
 
 # Install required Python 3 packages via Pipenv.
 RUN pip3 install --no-cache-dir pipenv
