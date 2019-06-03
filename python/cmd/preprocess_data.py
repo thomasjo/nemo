@@ -19,6 +19,9 @@ import cv2 as cv
 import numpy as np
 from docopt import docopt
 
+OVERLAY_ALPHA = 0.5
+OVERLAY_COLOR = [127, 0, 255]
+
 
 def _output_path(orig_path, suffix=None):
     file_name = orig_path.stem
@@ -84,6 +87,7 @@ if __name__ == "__main__":
     print("Source directory:", source_dir)
     print("-" * 72)
 
+    # TODO: Make patch size configurable or dynamic?
     patch_dims = np.array([224, 224])
     patch_height, patch_width = patch_dims
 
@@ -129,10 +133,9 @@ if __name__ == "__main__":
         _imwrite(image_file, image_binary, suffix="binary")
 
         # Create an image with mask overlays. Useful for visual debugging.
-        alpha = 0.5
         image_seg = image.copy()
-        image_seg[image_binary == 255] = [127, 0, 255]
-        image_overlay = cv.addWeighted(image_seg, alpha, image, 1 - alpha, 0)
+        image_seg[image_binary == 255] = OVERLAY_COLOR
+        image_overlay = cv.addWeighted(image_seg, OVERLAY_ALPHA, image, 1 - OVERLAY_ALPHA, 0)
         _imwrite(image_file, image_overlay, suffix="overlay")
 
         # Create an image with bounding boxes. Useful for visual debugging.
@@ -140,6 +143,7 @@ if __name__ == "__main__":
 
         patch_num = 0
         for i in range(1, n_labels):
+            # Ignore patch candidates below defined pixel count threshold.
             if np.isin(i, labels[pixel_counts < 1024]):
                 continue
 
