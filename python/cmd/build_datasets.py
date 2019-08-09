@@ -4,21 +4,10 @@ from contextlib import contextmanager
 from pathlib import Path
 
 LABEL_PREFIXES = {
-    "Bent-": "benthic",
-    "Plank-": "planktic",
-    "SedA-": "sediment",
-    "SedB-": "sediment",
+    "Bent": "benthic",
+    "Plank": "planktic",
+    "Sed": "sediment",
 }
-
-TEST_FILE_PREFIXES = [
-    "Bent-01",
-    # "Bent-04",
-    # "Bent-09",
-    # "Plank-04",
-    "Plank-09",
-    "SedA-07",
-    "SedB-02",
-]
 
 
 @contextmanager
@@ -35,32 +24,17 @@ def recreate_dir(path):
     return path
 
 
-def label_from_name(name):
-    for prefix, label in LABEL_PREFIXES.items():
-        if name.startswith(prefix):
-            return label
-    return None
+def split_set(input, ratio):
+    split_idx = round(len(input) * ratio)
+    a, b = input[:split_idx], input[split_idx:]
+    return a, b
 
 
-def is_test_file(name):
-    for prefix in TEST_FILE_PREFIXES:
-        if name.startswith(prefix):
-            return True
-    return False
-
-
-def create_validation_set(source_dir, *, ratio):
-    source_files = sorted([file for file in source_dir.rglob("*.png")])
-
-    # Make the splitting reproducible by using a fixed seed.
-    with random_seed(42):
-        random.shuffle(source_files)
-        split = round((1.0 - ratio) * len(source_files))
-        valid_files = source_files[split:]
-
-    for image_file in valid_files:
-        target_dir = valid_dir / image_file.parent.name
-        shutil.move(str(image_file), str(target_dir))
+def copy_files_to_dir(src_files, dst_dir):
+    dst_dir.mkdir(exist_ok=True)
+    for src_file in src_files:
+        dst_file = dst_dir / src_file.name
+        shutil.copy2(src_file, dst_file)
 
 
 if __name__ == "__main__":
@@ -75,22 +49,19 @@ if __name__ == "__main__":
     valid_dir = recreate_dir(data_dir / "valid")
     test_dir = recreate_dir(data_dir / "test")
 
-    for label in LABEL_PREFIXES.values():
-        (train_dir / label).mkdir(exist_ok=True)
-        (valid_dir / label).mkdir(exist_ok=True)
-        (test_dir / label).mkdir(exist_ok=True)
+    for prefix, label in LABEL_PREFIXES.items():
+        # Find all patches for current label.
+        patches = sorted(processed_dir.rglob(f"{prefix}*patch*.png"))
 
-    all_patch_images = sorted(processed_dir.rglob("*-patch*.png"))
-    for image_file in all_patch_images:
-        image_name = image_file.name
-        image_label = label_from_name(image_name)
-        if image_label is None:
-            continue
+        # Shuffle patches in a reproducible manner.
+        with random_seed(42):
+            random.shuffle(patches)
 
-        target_dir = test_dir if is_test_file(image_name) else train_dir
-        target_file = target_dir / image_label / image_name
+        # Split label patches into subsets.
+        train_patches, test_patches = split_set(patches, 0.8)
+        valid_patches, test_patches = split_set(test_patches, 0.5)
 
-        shutil.copy2(image_file, target_file)
-
-    # Extract a validation set from 15% of the training set.
-    create_validation_set(train_dir, ratio=0.15)
+        # Copy all image patches to subset directories.
+        copy_files_to_dir(train_patches, train_dir / label)
+        copy_files_to_dir(valid_patches, valid_dir / label)
+        copy_files_to_dir(test_patches, test_dir / label)
