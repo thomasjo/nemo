@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 LABEL_PREFIXES = {
+    "Agglutinated": "agglutinated",
     "Bent": "benthic",
     "Plank": "planktic",
     "Sed": "sediment",
