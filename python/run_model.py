@@ -36,8 +36,10 @@ if __name__ == "__main__":
     mixed_dataset = mixed_dataset.batch(BATCH_SIZE)
     mixed_dataset = mixed_dataset.prefetch(AUTOTUNE)
 
-    # Extract class predictions.
+    # Extract softmax class predictions.
     predictions = model.predict(mixed_dataset)
+
+    # Convert softmax predictions to "hard" predictions.
     predictions = np.argmax(predictions, axis=1)
 
     # Prepare directory for predictions.
