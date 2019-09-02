@@ -19,10 +19,10 @@ Once the source images have been preprocessed by extracting patches, datasets
 for training, validation, and testing are generated automatically by using the
 `build_datasets.py` script.
 
-### Caveat regarding `raw2` source images
+### Caveat regarding `raw-halves` source images
 
-The `raw2` source images are slightly different in nature, and requires that
-the `preprocess_data.py` script be invoked with `--border-threshold=50`.
+The `raw-halves` source images are slightly different in nature, and requires
+that the `preprocess_data.py` script be invoked with `--border-threshold=50`.
 Patches extracted from this dataset should be manually copied to the `train`
 folder built by process outlined above. In the future, we should find a way to
 fully automate this process as well.
