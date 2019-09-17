@@ -1,7 +1,18 @@
+"""
+Usage:
+  finetune_model.py [options] <source> <output> <model>
+
+Options:
+  --epochs=N          Number of fine-tuning epochs. [default: 5]
+  --initial-epochs=N  Number of initial training epochs. [default: 25]
+  -h, --help          Show this screen.
+"""
+
 from datetime import datetime
 from pathlib import Path
 
 import tensorflow as tf
+from docopt import docopt
 from tensorflow import keras
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy
@@ -15,16 +26,11 @@ BATCH_SIZE = 32
 IMAGE_SIZE = 224
 
 
-if __name__ == "__main__":
-    file_dir = Path(__file__).parent.resolve()
-    root_dir = file_dir.parent
-
-    # TODO: Make these configurable?
-    output_dir = root_dir / "output"
-    train_dataset, valid_dataset, test_dataset, metadata = load_datasets()
+def main(source_dir, output_dir, model_file, epochs, initial_epochs):
+    # TODO: Make this configurable?
+    train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
 
     # Load a pre-trained model.
-    model_file = output_dir / "nemo.h5"
     model = keras.models.load_model(str(model_file), compile=False)
 
     # Only fine-tune the last few layers of the base model.
@@ -42,8 +48,6 @@ if __name__ == "__main__":
     # model.summary()
 
     # Initial training parameters.
-    initial_epochs = 25
-    fine_tune_epochs = 25
     total_epochs = initial_epochs + fine_tune_epochs
     steps_per_epoch = metadata.train_count // BATCH_SIZE
     steps_per_epoch *= 4  # Increase steps because of image augmentations
@@ -63,7 +67,19 @@ if __name__ == "__main__":
     print("final loss: {:.2f}".format(loss))
     print("final accuracy: {:.2f}".format(accuracy))
 
+    # Save fine-tuned model.
     timestamp = datetime.utcnow()
     timestamp = timestamp.strftime("%Y-%m-%d-%H%M")
     model_file = output_dir / "nemo-ft--{}--{:.2f}.h5".format(timestamp, accuracy)
     model.save(str(model_file))
+
+
+if __name__ == "__main__":
+    args = docopt(__doc__)
+    source_dir = Path(args["<source>"])
+    output_dir = Path(args["<output>"])
+    model_file = Path(args["<model>"])
+    epochs = int(args["--epochs"])
+    initial_epochs = int(args["--initial-epochs"])
+
+    main(source_dir, output_dir, model_file, epochs, initial_epochs)

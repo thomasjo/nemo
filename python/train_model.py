@@ -1,7 +1,17 @@
+"""
+Usage:
+  train_model.py [options] <source> <output>
+
+Options:
+  --epochs=N  Number of training epochs. [default: 25]
+  -h, --help  Show this screen.
+"""
+
 from datetime import datetime
 from pathlib import Path
 
 import tensorflow as tf
+from docopt import docopt
 from tensorflow import keras
 from tensorflow.keras.applications import VGG16
 from tensorflow.keras.layers import Dense, GlobalMaxPooling2D
@@ -17,8 +27,8 @@ BATCH_SIZE = 32
 IMAGE_SIZE = 224
 
 
-if __name__ == "__main__":
-    train_dataset, valid_dataset, test_dataset, metadata = load_datasets()
+def main(source_dir, output_dir, epochs):
+    train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
     num_classes = len(metadata.labels)
 
     # Load a pre-trained base model to use for feature extraction.
@@ -51,7 +61,7 @@ if __name__ == "__main__":
     print("\nTraining model...")
 
     # Initial training parameters.
-    initial_epochs = 25
+    initial_epochs = epochs
     steps_per_epoch = (metadata.train_count // BATCH_SIZE) * 4
 
     history = model.fit(
@@ -66,14 +76,20 @@ if __name__ == "__main__":
     print("final loss: {:.2f}".format(loss))
     print("final accuracy: {:.2f}".format(accuracy))
 
-    # Initialize output directory.
-    # NOTE: Make this configurable?
-    file_dir = Path(__file__).parent.resolve()
-    root_dir = file_dir.parent
-    output_dir = root_dir / "output"
+    # Ensure output directory exists.
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Save trained model.
     timestamp = datetime.utcnow()
     timestamp = timestamp.strftime("%Y-%m-%d-%H%M")
     model_file = output_dir / "nemo--{}--{:.2f}.h5".format(timestamp, accuracy)
     model.save(str(model_file))
+
+
+if __name__ == "__main__":
+    args = docopt(__doc__)
+    source_dir = Path(args["<source>"])
+    output_dir = Path(args["<output>"])
+    epochs = int(args["--epochs"])
+
+    main(source_dir, output_dir, epochs)
