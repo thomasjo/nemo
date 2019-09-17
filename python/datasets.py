@@ -42,14 +42,13 @@ def dataset_from_dir(source_dir, label_lookup):
     return dataset, len(files)
 
 
-def load_datasets():
-    # TODO: Make these configurable/arguments?
-    data_dir = _data_dir()
+def load_datasets(data_dir):
+    # TODO: Make these configurable?
     train_dir = data_dir / "train"
     valid_dir = data_dir / "valid"
     test_dir = data_dir / "test"
 
-    # Fetch label names, and a map from names to indices.
+    # Fetch labels as a map from names to indices.
     labels = labels_for_dir(train_dir)
 
     # Prepare training dataset.
