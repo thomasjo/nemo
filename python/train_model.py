@@ -19,7 +19,7 @@ from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy
 from tensorflow.keras.optimizers import RMSprop
 
-from datasets import load_datasets
+from datasets import load_datasets, save_labels
 
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
@@ -84,6 +84,10 @@ def main(source_dir, output_dir, epochs):
     timestamp = timestamp.strftime("%Y-%m-%d-%H%M")
     model_file = output_dir / "nemo--{}--{:.2f}.h5".format(timestamp, accuracy)
     model.save(str(model_file))
+
+    # Save labels used by the trained model.
+    label_file = model_file.with_suffix(".yaml")
+    save_labels(label_file, metadata.labels)
 
 
 if __name__ == "__main__":

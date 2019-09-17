@@ -7,6 +7,7 @@ Options:
 """
 
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -14,7 +15,7 @@ import tensorflow as tf
 import tensorflow.keras as keras
 from docopt import docopt
 
-from datasets import labels_for_dir
+from datasets import read_labels
 from images import load_and_preprocess_image
 
 # Used for auto-tuning dataset prefetch size, etc.
@@ -32,7 +33,8 @@ def main(source_dir, output_dir, model_file):
     dataset = dataset.prefetch(AUTOTUNE)
 
     # Read labels associated with the trained model.
-    labels = labels_for_dir(source_dir.parent / "train")
+    label_file = model_file.with_suffix(".yaml")
+    labels = read_labels(label_file)
 
     # Load trained model.
     model = keras.models.load_model(str(model_file), compile=False)
@@ -44,9 +46,10 @@ def main(source_dir, output_dir, model_file):
     # Convert softmax predictions to "hard" predictions.
     predictions = np.argmax(predictions, axis=1)
 
-    # Prepare directory for predictions.
-    result_dir = output_dir / "predictions"
-    shutil.rmtree(result_dir, ignore_errors=True)
+    # Prepare output directory for predictions.
+    timestamp = datetime.utcnow()
+    timestamp = timestamp.strftime("%Y-%m-%d-%H%M")
+    result_dir = output_dir / "predictions" / timestamp
     result_dir.mkdir(parents=True)
 
     # Prepare sub-directories for all dataset labels.
