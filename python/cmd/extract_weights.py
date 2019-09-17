@@ -6,10 +6,11 @@ Options:
   -h --help  Show this screen.
 """
 
+from docopt import docopt
+
 from pathlib import Path
 
 import tensorflow.keras as keras
-from docopt import docopt
 
 
 def extract_weights(model_file, output_file):

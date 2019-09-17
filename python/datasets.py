@@ -2,8 +2,9 @@ from collections import namedtuple
 from pathlib import Path
 
 import tensorflow as tf
-import yaml
 from tensorflow.python import keras
+
+import yaml
 
 from images import augment_image, load_and_preprocess_image
 

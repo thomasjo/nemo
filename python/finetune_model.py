@@ -8,11 +8,12 @@ Options:
   -h, --help          Show this screen.
 """
 
+from docopt import docopt
+
 from datetime import datetime
 from pathlib import Path
 
 import tensorflow as tf
-from docopt import docopt
 from tensorflow import keras
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy

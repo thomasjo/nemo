@@ -6,14 +6,16 @@ Options:
   -h, --help  Show this screen.
 """
 
+from docopt import docopt
+
 import shutil
 from datetime import datetime
 from pathlib import Path
 
-import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
-from docopt import docopt
+
+import numpy as np
 
 from datasets import read_labels
 from images import load_and_preprocess_image

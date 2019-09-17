@@ -9,3 +9,8 @@ line_length = 99
 lines_between_types = 0
 multi_line_output = 3
 use_parentheses = true
+
+# Custom sections for some important modules.
+known_docopt = "docopt"
+known_tensorflow = "tensorflow"
+sections = "DOCOPT,FUTURE,STDLIB,TENSORFLOW,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"

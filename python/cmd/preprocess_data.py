@@ -12,12 +12,13 @@ Options:
   -h, --help                   Show this screen.
 """
 
+from docopt import docopt
+
 import shutil
 from pathlib import Path
 
 import cv2 as cv
 import numpy as np
-from docopt import docopt
 
 OVERLAY_ALPHA = 0.5
 OVERLAY_COLOR = [127, 0, 255]

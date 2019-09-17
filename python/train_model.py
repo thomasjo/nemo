@@ -7,11 +7,12 @@ Options:
   -h, --help  Show this screen.
 """
 
+from docopt import docopt
+
 from datetime import datetime
 from pathlib import Path
 
 import tensorflow as tf
-from docopt import docopt
 from tensorflow import keras
 from tensorflow.keras.applications import VGG16
 from tensorflow.keras.layers import Dense, GlobalMaxPooling2D
