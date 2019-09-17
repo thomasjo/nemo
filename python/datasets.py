@@ -2,6 +2,7 @@ from collections import namedtuple
 from pathlib import Path
 
 import tensorflow as tf
+import yaml
 from tensorflow.python import keras
 
 from images import augment_image, load_and_preprocess_image
@@ -26,6 +27,16 @@ def labels_for_dir(path):
     labels = sorted(child.name for child in path.glob("*/") if child.is_dir())
     labels = dict((name, index) for index, name in enumerate(labels))
     return labels
+
+
+def save_labels(path: Path, labels: dict):
+    with path.open("w") as f:
+        yaml.safe_dump(labels, f)
+
+
+def read_labels(path: Path):
+    with path.open("r") as f:
+        return yaml.safe_load(f)
 
 
 def dataset_from_dir(source_dir, label_lookup):
