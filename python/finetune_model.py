@@ -15,6 +15,7 @@ from pathlib import Path
 
 import tensorflow as tf
 from tensorflow import keras
+from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy
 from tensorflow.keras.optimizers import RMSprop
@@ -53,14 +54,17 @@ def main(source_dir, output_dir, model_file, epochs, initial_epochs):
     steps_per_epoch = metadata.train_count // BATCH_SIZE
     steps_per_epoch *= 4  # Increase steps because of image augmentations
 
-    print("Fine-tuning model...")
+    # Use early stopping to prevent overfitting, etc.
+    early_stopping = EarlyStopping()
 
+    print("Fine-tuning model...")
     history = model.fit(
         train_dataset.repeat(),
         validation_data=valid_dataset,
         epochs=total_epochs,
         initial_epoch=initial_epochs,
         steps_per_epoch=steps_per_epoch,
+        callbacks=[early_stopping],
     )
 
     print("\nEvaluating model after training...")

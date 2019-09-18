@@ -15,6 +15,7 @@ from pathlib import Path
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.applications import VGG16
+from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import Dense, GlobalMaxPooling2D
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy
@@ -65,11 +66,15 @@ def main(source_dir, output_dir, epochs):
     initial_epochs = epochs
     steps_per_epoch = (metadata.train_count // BATCH_SIZE) * 4
 
+    # Use early stopping to prevent overfitting, etc.
+    early_stopping = EarlyStopping()
+
     history = model.fit(
         train_dataset.repeat(),
         validation_data=valid_dataset,
         epochs=initial_epochs,
         steps_per_epoch=steps_per_epoch,
+        callbacks=[early_stopping],
     )
 
     print("\nEvaluating model after training...")
