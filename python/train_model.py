@@ -67,7 +67,7 @@ def main(source_dir, output_dir, epochs):
     steps_per_epoch = (metadata.train_count // BATCH_SIZE) * 4
 
     # Use early stopping to prevent overfitting, etc.
-    early_stopping = EarlyStopping()
+    early_stopping = EarlyStopping(patience=2, restore_best_weights=True)
 
     history = model.fit(
         train_dataset.repeat(),
