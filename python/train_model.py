@@ -56,7 +56,7 @@ def main(source_dir, output_dir, epochs):
     # model.summary()
 
     print("\nEvaluating model before training...")
-    loss0, accuracy0 = model.evaluate(train_dataset)
+    loss0, accuracy0 = model.evaluate(test_dataset)
     print("initial loss: {:.2f}".format(loss0))
     print("initial accuracy: {:.2f}".format(accuracy0))
 
