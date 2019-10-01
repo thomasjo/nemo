@@ -44,9 +44,9 @@ def main(source_dir, output_dir, epochs):
     model.add(base_model)
     model.add(Flatten())
     model.add(Dense(512, activation="relu"))
-    model.add(Dropout(0.5, force=True))
+    model.add(Dropout(0.5))
     model.add(Dense(64, activation="relu"))
-    model.add(Dropout(0.5, force=True))
+    model.add(Dropout(0.5))
     model.add(Dense(num_classes, activation="softmax"))
 
     # Prepare optimizer, loss function, and metrics.
