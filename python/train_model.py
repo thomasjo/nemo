@@ -16,12 +16,13 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.applications import VGG16
 from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.layers import Dense, GlobalMaxPooling2D
+from tensorflow.keras.layers import Dense, Flatten, GlobalMaxPooling2D
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy
 from tensorflow.keras.optimizers import RMSprop
 
 from datasets import load_datasets, save_labels
+from layers import Dropout
 
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
@@ -37,13 +38,15 @@ def main(source_dir, output_dir, epochs):
     input_shape = (IMAGE_SIZE, IMAGE_SIZE, 3)
     base_model = VGG16(include_top=False, weights="imagenet", input_shape=input_shape)
     base_model.trainable = False
-    # base_model.summary()
 
     # Create model by stacking a prediction layer on top of the base model.
     model = keras.Sequential()
     model.add(base_model)
-    model.add(GlobalMaxPooling2D())
+    model.add(Flatten())
+    model.add(Dense(512, activation="relu"))
+    model.add(Dropout(0.5, force=True))
     model.add(Dense(64, activation="relu"))
+    model.add(Dropout(0.5, force=True))
     model.add(Dense(num_classes, activation="softmax"))
 
     # Prepare optimizer, loss function, and metrics.
@@ -52,23 +55,23 @@ def main(source_dir, output_dir, epochs):
     loss = CategoricalCrossentropy()
     metrics = [CategoricalAccuracy()]
 
+    print("Compiling model...")
     model.compile(optimizer, loss, metrics)
-    # model.summary()
 
-    print("\nEvaluating model before training...")
+    print("Evaluating model before training...")
     loss0, accuracy0 = model.evaluate(test_dataset)
     print("initial loss: {:.2f}".format(loss0))
     print("initial accuracy: {:.2f}".format(accuracy0))
 
-    print("\nTraining model...")
-
     # Initial training parameters.
     initial_epochs = epochs
-    steps_per_epoch = (metadata.train_count // BATCH_SIZE) * 4
+    steps_per_epoch = metadata.train_count // BATCH_SIZE
+    steps_per_epoch *= 4  # Increase steps because of image augmentations
 
     # Use early stopping to prevent overfitting, etc.
     early_stopping = EarlyStopping(patience=2, restore_best_weights=True)
 
+    print("Training model...")
     history = model.fit(
         train_dataset.repeat(),
         validation_data=valid_dataset,

@@ -21,6 +21,7 @@ from tensorflow.keras.metrics import CategoricalAccuracy
 from tensorflow.keras.optimizers import RMSprop
 
 from datasets import load_datasets, save_labels
+from layers import Dropout
 
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
@@ -33,11 +34,14 @@ def main(source_dir, output_dir, model_file, epochs, initial_epochs):
     train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
 
     # Load a pre-trained model.
-    model = keras.models.load_model(str(model_file), compile=False)
+    model = keras.models.load_model(str(model_file), custom_objects={
+        "Dropout": Dropout,
+    })
 
     # Only fine-tune the last few layers of the base model.
     base_model = model.layers[0]
-    for layer in base_model.layers[:15]:
+    base_model.trainable = True
+    for layer in base_model.layers[:-8]:
         layer.trainable = False
 
     # Prepare optimizer, loss function, and metrics.
