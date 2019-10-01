@@ -50,7 +50,7 @@ def main(source_dir, output_dir, model_file, epochs, initial_epochs):
     # model.summary()
 
     # Initial training parameters.
-    total_epochs = initial_epochs + fine_tune_epochs
+    total_epochs = initial_epochs + epochs
     steps_per_epoch = metadata.train_count // BATCH_SIZE
     steps_per_epoch *= 4  # Increase steps because of image augmentations
 
