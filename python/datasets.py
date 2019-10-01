@@ -40,7 +40,7 @@ def read_labels(path: Path):
         return yaml.safe_load(f)
 
 
-def dataset_from_dir(source_dir, label_lookup):
+def dataset_from_dir(source_dir, label_lookup, return_files=False):
     files = sorted([file for file in source_dir.rglob("*.png")])
 
     # Extract labels based on directory structure convention.
@@ -50,6 +50,9 @@ def dataset_from_dir(source_dir, label_lookup):
     # Tensors can't represent Path objects; use strings instead.
     files = [str(file) for file in files]
     dataset = tf.data.Dataset.from_tensor_slices((files, labels))
+
+    if return_files:
+        return dataset, len(files), files
 
     return dataset, len(files)
 
