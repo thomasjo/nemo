@@ -39,8 +39,9 @@ def main(source_dir, output_dir, model_file):
     labels = read_labels(label_file)
 
     # Load trained model.
-    model = keras.models.load_model(str(model_file), compile=False)
-    # model.summary()
+    model = keras.models.load_model(str(model_file), , custom_objects={
+        "Dropout": Dropout,
+    })
 
     # Extract softmax class predictions.
     predictions = model.predict(dataset)

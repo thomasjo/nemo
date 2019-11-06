@@ -20,7 +20,8 @@ from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy
 from tensorflow.keras.optimizers import RMSprop
 
-from datasets import load_datasets
+from datasets import load_datasets, save_labels
+from layers import Dropout
 
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
@@ -33,11 +34,12 @@ def main(source_dir, output_dir, model_file, epochs, initial_epochs):
     train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
 
     # Load a pre-trained model.
-    model = keras.models.load_model(str(model_file), compile=False)
+    model = keras.models.load_model(str(model_file), custom_objects={"Dropout": Dropout})
 
     # Only fine-tune the last few layers of the base model.
     base_model = model.layers[0]
-    for layer in base_model.layers[:15]:
+    base_model.trainable = True
+    for layer in base_model.layers[:-8]:
         layer.trainable = False
 
     # Prepare optimizer, loss function, and metrics.
@@ -50,7 +52,7 @@ def main(source_dir, output_dir, model_file, epochs, initial_epochs):
     # model.summary()
 
     # Initial training parameters.
-    total_epochs = initial_epochs + fine_tune_epochs
+    total_epochs = initial_epochs + epochs
     steps_per_epoch = metadata.train_count // BATCH_SIZE
     steps_per_epoch *= 4  # Increase steps because of image augmentations
 
@@ -77,6 +79,10 @@ def main(source_dir, output_dir, model_file, epochs, initial_epochs):
     timestamp = timestamp.strftime("%Y-%m-%d-%H%M")
     model_file = output_dir / "nemo-ft--{}--{:.2f}.h5".format(timestamp, accuracy)
     model.save(str(model_file))
+
+    # Save labels used by the fine-tuned model.
+    label_file = model_file.with_suffix(".yaml")
+    save_labels(label_file, metadata.labels)
 
 
 if __name__ == "__main__":
