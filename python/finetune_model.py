@@ -53,7 +53,7 @@ def main(source_dir, output_dir, model_file, epochs, initial_epochs):
     steps_per_epoch *= 4  # Increase steps because of image augmentations
 
     # Use early stopping to prevent overfitting, etc.
-    early_stopping = EarlyStopping(patience=1, restore_best_weights=True)
+    early_stopping = EarlyStopping(patience=2, restore_best_weights=True)
 
     print("Fine-tuning model...")
     history = model.fit(
