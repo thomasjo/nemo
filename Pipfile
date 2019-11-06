@@ -22,7 +22,7 @@ pyyaml = "*"
 scikit-image = "*"
 scikit-learn = "*"
 scipy = "*"
-tensorflow-gpu = "==2.0.0-beta1"
+# tensorflow-gpu = "==2.0.0"  # HACK: Disable due to incompatibility with Pipenv
 tensorflow-hub = "*"
 tqdm = "*"
 
