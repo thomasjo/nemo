@@ -45,7 +45,7 @@ def main(source_dir, output_dir, model_file):
     dataset = dataset.prefetch(AUTOTUNE)
 
     # Load trained model.
-    model = load_model(model_file)
+    model, base_model = load_model(model_file)
 
     # Force dropout during inferrence.
     for layer in model.layers:
