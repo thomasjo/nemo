@@ -41,7 +41,7 @@ RUN pip3 install --no-cache-dir pipenv
 ADD Pipfile* /tmp/
 RUN pipenv install --system --deploy
 # HACK: Workaround for setup.py problems with Pipenv...
-RUN pipenv run pip install -U tensorflow-gpu==2.0.0
+RUN pip3 install -U tensorflow-gpu==2.0.0
 
 # Bundle executable project files.
 # ADD bin/* /usr/local/bin/
