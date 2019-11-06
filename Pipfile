@@ -15,7 +15,7 @@ gast = "==0.2.2"  # Lock version due to breaking changes
 h5py = "*"
 imageio = "*"
 matplotlib = "*"
-numpy = "*"
+numpy = "==1.16.4"  # Lock due to annoying deprecation warnings
 opencv-python = "*"
 pandas = "*"
 pyyaml = "*"
