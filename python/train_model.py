@@ -13,16 +13,13 @@ from datetime import datetime
 from pathlib import Path
 
 import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras.applications import VGG16
 from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.layers import Dense, Flatten, GlobalMaxPooling2D
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy
 from tensorflow.keras.optimizers import RMSprop
 
 from datasets import load_datasets, save_labels
-from layers import Dropout
+from models import create_model
 
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
@@ -33,21 +30,9 @@ IMAGE_SIZE = 224
 def main(source_dir, output_dir, epochs):
     train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
     num_classes = len(metadata.labels)
-
-    # Load a pre-trained base model to use for feature extraction.
     input_shape = (IMAGE_SIZE, IMAGE_SIZE, 3)
-    base_model = VGG16(include_top=False, weights="imagenet", input_shape=input_shape)
-    base_model.trainable = False
 
-    # Create model by stacking a prediction layer on top of the base model.
-    model = keras.Sequential()
-    model.add(base_model)
-    model.add(Flatten())
-    model.add(Dense(512, activation="relu"))
-    model.add(Dropout(0.5))
-    model.add(Dense(64, activation="relu"))
-    model.add(Dropout(0.5))
-    model.add(Dense(num_classes, activation="softmax"))
+    model, base_model = create_model(input_shape, num_classes)
 
     # Prepare optimizer, loss function, and metrics.
     learning_rate = 0.0005

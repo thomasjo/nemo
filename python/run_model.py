@@ -8,17 +8,16 @@ Options:
 
 from docopt import docopt
 
-import shutil
 from datetime import datetime
 from pathlib import Path
 
 import tensorflow as tf
-import tensorflow.keras as keras
 
 import numpy as np
 
 from datasets import read_labels
 from images import load_and_preprocess_image
+from models import load_model
 
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
@@ -39,9 +38,7 @@ def main(source_dir, output_dir, model_file):
     labels = read_labels(label_file)
 
     # Load trained model.
-    model = keras.models.load_model(str(model_file), , custom_objects={
-        "Dropout": Dropout,
-    })
+    model, base_model = load_model(model_file)
 
     # Extract softmax class predictions.
     predictions = model.predict(dataset)
