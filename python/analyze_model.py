@@ -9,7 +9,6 @@ Options:
 from docopt import docopt
 
 import pickle
-import shutil
 from datetime import datetime
 from pathlib import Path
 

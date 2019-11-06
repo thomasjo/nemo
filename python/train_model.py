@@ -64,6 +64,7 @@ def main(source_dir, output_dir, epochs):
         steps_per_epoch=steps_per_epoch,
         callbacks=[early_stopping],
     )
+    print(history)
 
     print("\nEvaluating model after training...")
     loss, accuracy = model.evaluate(test_dataset)

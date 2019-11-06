@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
-
 DEFAULT_LABEL_LOOKUP = {"agglutinated": 0, "benthic": 1, "planktic": 2, "sediment": 3}
 
 
