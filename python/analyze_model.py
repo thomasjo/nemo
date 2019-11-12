@@ -9,7 +9,6 @@ Options:
 from docopt import docopt
 
 import pickle
-import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -22,6 +21,7 @@ from tqdm import tqdm
 from datasets import dataset_from_dir, read_labels
 from images import load_and_preprocess_image
 from layers import Dropout
+from models import load_model
 
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
@@ -45,7 +45,7 @@ def main(source_dir, output_dir, model_file):
     dataset = dataset.prefetch(AUTOTUNE)
 
     # Load trained model.
-    model = keras.models.load_model(str(model_file), custom_objects={"Dropout": Dropout})
+    model, base_model = load_model(model_file)
 
     # Force dropout during inferrence.
     for layer in model.layers:

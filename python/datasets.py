@@ -30,12 +30,12 @@ def labels_for_dir(path):
     return labels
 
 
-def save_labels(path: Path, labels: dict):
+def save_labels(path, labels):
     with path.open("w") as f:
         yaml.safe_dump(labels, f)
 
 
-def read_labels(path: Path):
+def read_labels(path):
     with path.open("r") as f:
         return yaml.safe_load(f)
 

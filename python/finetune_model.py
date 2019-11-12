@@ -14,14 +14,13 @@ from datetime import datetime
 from pathlib import Path
 
 import tensorflow as tf
-from tensorflow import keras
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy
 from tensorflow.keras.optimizers import RMSprop
 
 from datasets import load_datasets, save_labels
-from layers import Dropout
+from models import load_model
 
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
@@ -30,14 +29,12 @@ IMAGE_SIZE = 224
 
 
 def main(source_dir, output_dir, model_file, epochs, initial_epochs):
-    # TODO: Make this configurable?
     train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
 
     # Load a pre-trained model.
-    model = keras.models.load_model(str(model_file), custom_objects={"Dropout": Dropout})
+    model, base_model = load_model(model_file)
 
     # Only fine-tune the last few layers of the base model.
-    base_model = model.layers[0]
     base_model.trainable = True
     for layer in base_model.layers[:-8]:
         layer.trainable = False
@@ -49,7 +46,6 @@ def main(source_dir, output_dir, model_file, epochs, initial_epochs):
     metrics = [CategoricalAccuracy()]
 
     model.compile(optimizer, loss, metrics)
-    # model.summary()
 
     # Initial training parameters.
     total_epochs = initial_epochs + epochs
@@ -57,7 +53,7 @@ def main(source_dir, output_dir, model_file, epochs, initial_epochs):
     steps_per_epoch *= 4  # Increase steps because of image augmentations
 
     # Use early stopping to prevent overfitting, etc.
-    early_stopping = EarlyStopping(patience=1, restore_best_weights=True)
+    early_stopping = EarlyStopping(patience=2, restore_best_weights=True)
 
     print("Fine-tuning model...")
     history = model.fit(
@@ -68,6 +64,7 @@ def main(source_dir, output_dir, model_file, epochs, initial_epochs):
         steps_per_epoch=steps_per_epoch,
         callbacks=[early_stopping],
     )
+    print(history)
 
     print("\nEvaluating model after training...")
     loss, accuracy = model.evaluate(test_dataset)
