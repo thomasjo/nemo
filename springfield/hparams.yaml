@@ -1,0 +1,4 @@
+name: nemo-hparams
+image: thomasjo/nemo:latest
+workingDir: /storage/nemo
+command: ["python3", "python/find_hparams.py", "data", "output"]
