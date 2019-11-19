@@ -8,6 +8,7 @@ black = "*"
 flake8 = "*"
 isort = { extras = ["pipfile"], version = "*" }
 jedi = "*"
+rope = "*"
 
 [packages]
 docopt = "*"
