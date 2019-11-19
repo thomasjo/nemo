@@ -62,7 +62,6 @@ def fit_model(model, datasets, metadata, epochs, steps=0, initial_epoch=0):
     # Use early stopping to prevent overfitting, etc.
     early_stopping = EarlyStopping(patience=2, restore_best_weights=True)
 
-    # print("Training model...")
     history = model.fit(
         train_dataset.repeat(),
         validation_data=valid_dataset,
