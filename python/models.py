@@ -52,15 +52,12 @@ def compile_model(model, learning_rate, hparams):
     return model
 
 
-def fit_model(model, datasets, metadata, epochs, steps_per_epoch=0):
+def fit_model(model, datasets, metadata, epochs, steps=0, initial_epoch=0):
     train_dataset, valid_dataset, _ = datasets
 
-    # Initial training parameters.
-    initial_epochs = epochs
-
-    if steps_per_epoch == 0:
-        steps_per_epoch = metadata.train_count // BATCH_SIZE
-        steps_per_epoch *= 4  # Increase steps because of image augmentations
+    if steps == 0:
+        steps = metadata.train_count // BATCH_SIZE
+        steps *= 4  # Increase steps because of image augmentations
 
     # Use early stopping to prevent overfitting, etc.
     early_stopping = EarlyStopping(patience=2, restore_best_weights=True)
@@ -69,9 +66,19 @@ def fit_model(model, datasets, metadata, epochs, steps_per_epoch=0):
     history = model.fit(
         train_dataset.repeat(),
         validation_data=valid_dataset,
-        epochs=initial_epochs,
-        steps_per_epoch=steps_per_epoch,
+        validation_steps=1,
+        initial_epoch=initial_epoch,
+        epochs=epochs,
+        steps_per_epoch=steps,
         callbacks=[early_stopping],
+        verbose=2,
     )
 
     return model, history
+
+
+def evaluate_model(model, datasets):
+    _, _, test_dataset = datasets
+    metrics = model.evaluate(test_dataset, verbose=2)
+
+    return metrics

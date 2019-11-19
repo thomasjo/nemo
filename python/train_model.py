@@ -14,26 +14,21 @@ from datetime import datetime
 from pathlib import Path
 
 from datasets import load_datasets, save_labels
-from hparams import HParams
-from models import compile_model, create_model, fit_model
+from hparams import get_default_hparams
+from models import compile_model, create_model, evaluate_model, fit_model
 
 
-LEARNING_RATE = 0.0005
-IMAGE_SIZE = 224
-
-
-def train_model(datasets, metadata, epochs, steps_per_epoch, hparams):
-    _, _, test_dataset = datasets
-
+def train_model(datasets, metadata, epochs, steps, hparams):
     num_classes = len(metadata.labels)
-    input_shape = (IMAGE_SIZE, IMAGE_SIZE, 3)
+    input_shape = (224, 224, 3)
 
     model, base_model = create_model(input_shape, num_classes, hparams)
-    model = compile_model(model, LEARNING_RATE, hparams)
 
-    # model.evaluate(test_dataset)
-    model, history = fit_model(model, datasets, metadata, epochs, steps_per_epoch)
-    metrics = model.evaluate(test_dataset)
+    learning_rate = 0.0005
+    model = compile_model(model, learning_rate, hparams)
+
+    model, history = fit_model(model, datasets, metadata, epochs, steps)
+    metrics = evaluate_model(model, datasets)
 
     return model, history, metrics
 
@@ -43,16 +38,13 @@ if __name__ == "__main__":
     source_dir = Path(args["<source>"])
     output_dir = Path(args["<output>"])
     epochs = int(args["--epochs"])
-    steps_per_epoch = int(args["--steps"])
-
-    default_hparams = HParams(num_units_fc1=512, num_units_fc2=64, dropout=0.5, optimizer="rmsprop")
+    steps = int(args["--steps"])
 
     train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
     datasets = (train_dataset, valid_dataset, test_dataset)
+    hparams = get_default_hparams()
 
-    model, history, (loss, accuracy) = train_model(
-        datasets, metadata, epochs, steps_per_epoch, default_hparams
-    )
+    model, history, (loss, accuracy) = train_model(datasets, metadata, epochs, steps, hparams)
 
     # Ensure output directory exists.
     output_dir.mkdir(parents=True, exist_ok=True)

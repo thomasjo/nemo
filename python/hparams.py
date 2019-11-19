@@ -1,5 +1,4 @@
 from collections import namedtuple
-from pathlib import Path
 
 from tensorboard.plugins.hparams import api as hp
 from tensorflow.keras.optimizers import Adam, RMSprop
@@ -12,8 +11,11 @@ OPTIMIZER_FN = {
     "rmsprop": RMSprop,
 }
 
-
 HParams = namedtuple("HParams", ["num_units_fc1", "num_units_fc2", "dropout", "optimizer"])
+
+
+def get_default_hparams():
+    return HParams(num_units_fc1=512, num_units_fc2=64, dropout=0.2, optimizer="adam")
 
 
 def parse_config_file(config_file):
