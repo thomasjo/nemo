@@ -1,0 +1,16 @@
+num_units_fc1:
+  - 256
+  - 384
+  - 512
+num_units_fc2:
+  - 16
+  - 32
+  - 64
+dropout:
+  - 0.2
+  - 0.3
+  - 0.4
+  - 0.5
+optimizer:
+  - adam
+  - rmsprop
