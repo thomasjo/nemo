@@ -65,7 +65,6 @@ def fit_model(model, datasets, metadata, epochs, steps=0, initial_epoch=0):
     history = model.fit(
         train_dataset.repeat(),
         validation_data=valid_dataset,
-        validation_steps=1,
         initial_epoch=initial_epoch,
         epochs=epochs,
         steps_per_epoch=steps,
