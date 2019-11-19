@@ -14,7 +14,7 @@ from datetime import datetime
 from pathlib import Path
 
 from datasets import load_datasets, save_labels
-from hparams import HP_DROPOUT, HP_NUM_UNITS_FC1, HP_NUM_UNITS_FC2, HP_OPTIMIZER
+from hparams import HParams
 from models import compile_model, create_model, fit_model
 
 
@@ -45,12 +45,7 @@ if __name__ == "__main__":
     epochs = int(args["--epochs"])
     steps_per_epoch = int(args["--steps"])
 
-    default_hparams = {
-        HP_NUM_UNITS_FC1: 512,
-        HP_NUM_UNITS_FC2: 64,
-        HP_DROPOUT: 0.5,
-        HP_OPTIMIZER: "rmsprop",
-    }
+    default_hparams = HParams(num_units_fc1=512, num_units_fc2=64, dropout=0.5, optimizer="rmsprop")
 
     train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
     datasets = (train_dataset, valid_dataset, test_dataset)

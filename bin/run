@@ -14,6 +14,7 @@ docker run --rm -it \
   --env TF_CPP_MIN_LOG_LEVEL="2" \
   --volume "${root_dir}/tmp/keras:/root/.keras" \
   --volume "${root_dir}/tmp/nv:/root/.nv" \
+  --volume "${root_dir}/config:/root/config" \
   --volume "${root_dir}/data:/root/data" \
   --volume "${root_dir}/output:/root/output" \
   --volume "${root_dir}/python:/root/python:ro" \

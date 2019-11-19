@@ -1,11 +1,10 @@
+from collections import namedtuple
+from pathlib import Path
+
 from tensorboard.plugins.hparams import api as hp
 from tensorflow.keras.optimizers import Adam, RMSprop
 
-
-HP_NUM_UNITS_FC1 = hp.HParam("num_units_fc1", hp.Discrete([256, 384, 512]))
-HP_NUM_UNITS_FC2 = hp.HParam("num_units_fc2", hp.Discrete([16, 32, 64]))
-HP_DROPOUT = hp.HParam("dropout", hp.Discrete([0.2, 0.3, 0.4, 0.5]))
-HP_OPTIMIZER = hp.HParam("optimizer", hp.Discrete(["adam", "rmsprop"]))
+import yaml
 
 
 OPTIMIZER_FN = {
@@ -14,11 +13,30 @@ OPTIMIZER_FN = {
 }
 
 
-def get_optimizer(name, learning_rate):
-    # Sanity check.
-    assert sorted(HP_OPTIMIZER.domain.values) == sorted(OPTIMIZER_FN.keys()), "Missing optimizer"
+HParams = namedtuple("HParams", ["num_units_fc1", "num_units_fc2", "dropout", "optimizer"])
 
+
+def parse_config_file(config_file):
+    with config_file.open() as f:
+        config_obj = yaml.safe_load(f)
+        return parse_config(config_obj)
+
+
+def parse_config(config_obj):
+    return HParams(
+        _hparam(config_obj, "num_units_fc1"),
+        _hparam(config_obj, "num_units_fc2"),
+        _hparam(config_obj, "dropout"),
+        _hparam(config_obj, "optimizer"),
+    )
+
+
+def get_optimizer(name, learning_rate):
     optimizer_fn = OPTIMIZER_FN[name]
     optimizer = optimizer_fn(learning_rate)
 
     return optimizer
+
+
+def _hparam(config_obj, name, display_name=None):
+    return hp.HParam(name, hp.Discrete(config_obj[name]), display_name)

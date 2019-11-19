@@ -6,7 +6,7 @@ from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy
 from tensorflow.keras.models import Sequential
 
-from hparams import HP_DROPOUT, HP_NUM_UNITS_FC1, HP_NUM_UNITS_FC2, HP_OPTIMIZER, get_optimizer
+from hparams import get_optimizer
 from layers import Dropout
 
 
@@ -23,11 +23,11 @@ def create_model(input_shape, num_classes, hparams):
     model.add(base_model)
     model.add(Flatten())
 
-    model.add(Dense(hparams[HP_NUM_UNITS_FC1], activation="relu"))
-    model.add(Dropout(hparams[HP_DROPOUT]))
+    model.add(Dense(hparams.num_units_fc1, activation="relu"))
+    model.add(Dropout(hparams.dropout))
 
-    model.add(Dense(hparams[HP_NUM_UNITS_FC2], activation="relu"))
-    model.add(Dropout(hparams[HP_DROPOUT]))
+    model.add(Dense(hparams.num_units_fc2, activation="relu"))
+    model.add(Dropout(hparams.dropout))
 
     model.add(Dense(num_classes, activation="softmax"))
 
@@ -43,10 +43,7 @@ def load_model(model_file):
 
 
 def compile_model(model, learning_rate, hparams):
-    # optimizer = RMSprop(learning_rate)
-    optimizer = hparams[HP_OPTIMIZER]
-    optimizer = get_optimizer(optimizer, learning_rate)
-
+    optimizer = get_optimizer(hparams.optimizer, learning_rate)
     loss = CategoricalCrossentropy()
     metrics = [CategoricalAccuracy()]
 
