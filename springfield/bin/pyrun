@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -eu
+
+args="$@"
+
+export TF_CPP_MIN_LOG_LEVEL="2"
+
+# Copy files from persistent storage to boost I/O performance.
+cp -r /storage/nemo/data /data
+
+# Execute command.
+python3 $args
+
+# Copy results to persistent storage.
+# ...

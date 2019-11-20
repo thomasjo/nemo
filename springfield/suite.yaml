@@ -1,0 +1,7 @@
+name: nemo-suite
+image: thomasjo/nemo:latest
+workingDir: /storage/nemo
+command: ["bin/pyrun", "python/training_suite.py", "/data", "output/suite"]
+# command: ["python3", "python/training_suite.py", "data", "output"]
+memory: 16Gi
+cpu: 4
