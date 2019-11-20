@@ -24,7 +24,7 @@ def train_model(datasets, metadata, epochs, steps, hparams):
 
     model, base_model = create_model(input_shape, num_classes, hparams)
 
-    learning_rate = 0.0005
+    learning_rate = 0.0001
     model = compile_model(model, learning_rate, hparams)
 
     model, history = fit_model(model, datasets, metadata, epochs, steps)

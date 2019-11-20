@@ -16,10 +16,10 @@ from pathlib import Path
 
 import numpy as np
 
-from train_model import train_model
+from datasets import load_datasets
 from finetune_model import finetune_model
 from hparams import get_default_hparams
-from datasets import load_datasets
+from train_model import train_model
 
 
 if __name__ == "__main__":
@@ -41,20 +41,24 @@ if __name__ == "__main__":
 
     accuracies = []
     for k in range(repeat):
-        print("--- Starting trial: ", str(k + 1))
+        run_name = "run-{}".format(k + 1)
+        print("--- Starting trial:", run_name)
 
         print("Training model...")
-        model, history, (loss, accuracy) = train_model(datasets, metadata, epochs, steps, hparams)
+        model, _, (_, acc) = train_model(datasets, metadata, epochs, steps, hparams)
 
-        model_file = "run-{}--{:.2f}.h5".format(k + 1, accuracy)
+        file_stem = "{}--{:.3f}.h5".format(run_name, acc)
+        model_file = (output_dir / file_stem).with_suffix(".h5")
         model.save(str(model_file))
 
         print("Fine-tuning model...")
-        ft_model, ft_history, (ft_loss, ft_accuracy) = finetune_model(
-            model_file, 0, datasets, metadata, epochs, steps, hparams
-        )
+        model, _, (_, ft_acc) = finetune_model(model_file, 0, datasets, metadata, epochs, steps, hparams)
 
-        accuracies.append([accuracy, ft_accuracy])
+        file_stem = "{}--{:.3f}.h5".format(file_stem, ft_acc)
+        model_file = (output_dir / file_stem).with_suffix(".h5")
+        model.save(str(model_file))
+
+        accuracies.append([acc, ft_acc])
 
     accuracies: np.ndarray = np.array(accuracies)
     np.save(str(output_dir / "results.npy"), accuracies)

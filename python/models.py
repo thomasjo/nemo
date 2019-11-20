@@ -60,7 +60,7 @@ def fit_model(model, datasets, metadata, epochs, steps=0, initial_epoch=0):
         steps *= 4  # Increase steps because of image augmentations
 
     # Use early stopping to prevent overfitting, etc.
-    early_stopping = EarlyStopping(patience=2, restore_best_weights=True)
+    early_stopping = EarlyStopping(patience=3, restore_best_weights=True)
 
     history = model.fit(
         train_dataset.repeat(),
