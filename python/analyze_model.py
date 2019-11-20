@@ -23,6 +23,7 @@ from images import load_and_preprocess_image
 from layers import Dropout
 from models import load_model
 
+
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 BATCH_SIZE = 32

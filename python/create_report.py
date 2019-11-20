@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
+
 DEFAULT_LABEL_LOOKUP = {"agglutinated": 0, "benthic": 1, "planktic": 2, "sediment": 3}
 
 
@@ -108,12 +109,7 @@ def generate_report(report_file, predictions, accuracies, files, labels, label_l
                     ax = plt.subplot(3, 2, i + 3)
                     ax.set_title(label_names[i])
                     ax.hist(
-                        predictions[:, idx, i],
-                        align="left",
-                        bins=20,
-                        range=(0, 1),
-                        fc="tab:blue",
-                        ec="tab:blue",
+                        predictions[:, idx, i], align="left", bins=20, range=(0, 1), fc="tab:blue", ec="tab:blue",
                     )
                     ax.axvline(np.round(predictions[:, idx, i].mean(), 1), c="tab:red")
 

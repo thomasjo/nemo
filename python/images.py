@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+
 IMAGE_SIZE = 224
 
 

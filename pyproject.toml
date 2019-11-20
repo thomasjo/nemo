@@ -1,16 +1,17 @@
 [tool.black]
-line_length = 99
+line_length = 120
 target_version = ["py36"]
 
 [tool.isort]
 force_grid_wrap = 0
 include_trailing_comma = true
-line_length = 99
+line_length = 120
+lines_after_imports = 2
 lines_between_types = 0
 multi_line_output = 3
 use_parentheses = true
 
 # Custom sections for some important modules.
 known_docopt = "docopt"
-known_tensorflow = "tensorflow"
+known_tensorflow = "tensorflow,tensorboard"
 sections = "DOCOPT,FUTURE,STDLIB,TENSORFLOW,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"

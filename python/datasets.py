@@ -1,5 +1,4 @@
 from collections import namedtuple
-from pathlib import Path
 
 import tensorflow as tf
 from tensorflow.python import keras
@@ -8,20 +7,10 @@ import yaml
 
 from images import augment_image, load_and_preprocess_image
 
+
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 BATCH_SIZE = 32
-
-
-def _root_dir():
-    file_dir = Path(__file__).parent.resolve()
-    root_dir = file_dir.parent
-    return root_dir
-
-
-def _data_dir():
-    data_dir = _root_dir() / "data"
-    return data_dir
 
 
 def labels_for_dir(path):

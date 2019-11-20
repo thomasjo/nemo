@@ -11,6 +11,7 @@ OPTIMIZER_FN = {
     "rmsprop": RMSprop,
 }
 
+
 HParams = namedtuple("HParams", ["num_units_fc1", "num_units_fc2", "dropout", "optimizer"])
 
 
