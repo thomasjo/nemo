@@ -13,9 +13,9 @@ from docopt import docopt
 from datetime import datetime
 from pathlib import Path
 
-from datasets import load_datasets, save_labels
-from hparams import get_default_hparams
-from models import compile_model, create_model, evaluate_model, fit_model
+from nemo.datasets import load_datasets, save_labels
+from nemo.hparams import get_default_hparams
+from nemo.models import compile_model, create_model, evaluate_model, fit_model
 
 
 def train_model(datasets, metadata, epochs, steps, hparams):

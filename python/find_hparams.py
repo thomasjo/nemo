@@ -16,9 +16,9 @@ from pathlib import Path
 import tensorflow as tf
 from tensorboard.plugins.hparams import api as hp
 
-from datasets import load_datasets
-from hparams import HParams, parse_config_file
-from train_model import train_model
+from nemo.datasets import load_datasets
+from nemo.hparams import HParams, parse_config_file
+from nemo.train_model import train_model
 
 
 METRIC_ACCURACY = "accuracy"

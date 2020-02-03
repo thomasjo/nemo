@@ -5,7 +5,7 @@ from tensorflow import keras
 
 import yaml
 
-from images import augment_image, load_and_preprocess_image
+from nemo.images import augment_image, load_and_preprocess_image
 
 
 # Used for auto-tuning dataset prefetch size, etc.

@@ -14,9 +14,9 @@ from docopt import docopt
 from datetime import datetime
 from pathlib import Path
 
-from datasets import load_datasets, save_labels
-from hparams import get_default_hparams
-from models import compile_model, evaluate_model, fit_model, load_model
+from nemo.datasets import load_datasets, save_labels
+from nemo.hparams import get_default_hparams
+from nemo.models import compile_model, evaluate_model, fit_model, load_model
 
 
 def finetune_model(model_file, initial_epoch, datasets, metadata, epochs, steps, hparams):

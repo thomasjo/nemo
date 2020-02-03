@@ -15,9 +15,9 @@ import tensorflow as tf
 
 import numpy as np
 
-from datasets import read_labels
-from images import load_and_preprocess_image
-from models import load_model
+from nemo.datasets import read_labels
+from nemo.images import load_and_preprocess_image
+from nemo.models import load_model
 
 # Used for auto-tuning dataset prefetch size, etc.
 AUTOTUNE = tf.data.experimental.AUTOTUNE

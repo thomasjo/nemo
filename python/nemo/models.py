@@ -6,8 +6,8 @@ from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy
 from tensorflow.keras.models import Sequential
 
-from hparams import get_optimizer
-from layers import Dropout
+from nemo.hparams import get_optimizer
+from nemo.layers import Dropout
 
 
 BATCH_SIZE = 32
