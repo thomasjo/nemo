@@ -18,10 +18,10 @@ import tensorflow.keras as keras
 import numpy as np
 from tqdm import tqdm
 
-from datasets import dataset_from_dir, read_labels
-from images import load_and_preprocess_image
-from layers import Dropout
-from models import load_model
+from nemo.datasets import dataset_from_dir, read_labels
+from nemo.images import load_and_preprocess_image
+from nemo.layers import Dropout
+from nemo.models import load_model
 
 
 # Used for auto-tuning dataset prefetch size, etc.

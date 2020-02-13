@@ -16,9 +16,10 @@ from pathlib import Path
 
 import numpy as np
 
-from datasets import load_datasets
-from finetune_model import finetune_model
-from hparams import get_default_hparams
+from nemo.datasets import load_datasets
+from nemo.finetune_model import finetune_model
+from nemo.hparams import get_default_hparams
+
 from train_model import train_model
 
 
