@@ -7,11 +7,14 @@ args="$@"
 parent_dir=$(dirname $(readlink -f "$0"))
 root_dir=$(dirname $parent_dir)
 
-image_tag="thomasjo/nemo:latest"
+image_tag="thomasjo/nemo:tensorflow-2.2.0"
 
 docker run --rm -it \
   --privileged \
+  --ipc host \
   --env TF_CPP_MIN_LOG_LEVEL="2" \
+  --env NVIDIA_VISIBLE_DEVICES="" \
+  --env CUDA_VISIBLE_DEVICES="" \
   --volume "${root_dir}/tmp/keras:/root/.keras" \
   --volume "${root_dir}/tmp/nv:/root/.nv" \
   --volume "${root_dir}/config:/root/config" \
