@@ -1,6 +1,6 @@
 """
 Usage:
-  training_suite.py [options] <source> <output>
+  training_suite.py [options] <source> <output> [<model>]
 
 Options:
   --repeat=N      Number of times to repeat the training block. [default: 10]
@@ -28,6 +28,7 @@ if __name__ == "__main__":
     args = docopt(__doc__)
     source_dir = Path(args["<source>"])
     output_dir = Path(args["<output>"])
+    model_file = Path(args["<model>"])
     repeat = int(args["--repeat"])
     epochs = int(args["--epochs"])
     steps = int(args["--steps"])
@@ -47,12 +48,18 @@ if __name__ == "__main__":
         run_name = "run-{}".format(k + 1)
         print("--- Starting trial:", run_name)
 
-        print("Training model...")
-        model, _, (_, acc) = train_model(datasets, metadata, epochs, steps, hparams, image_size)
+        # Skip training if a pretrained model has been provided.
+        if not model_file:
+            print("Training model...")
+            model, _, (_, acc) = train_model(datasets, metadata, epochs, steps, hparams, image_size)
 
-        file_stem = "{}--{:.3f}.h5".format(run_name, acc)
-        model_file = (output_dir / file_stem).with_suffix(".h5")
-        model.save(str(model_file))
+            file_stem = "{}--{:.3f}.h5".format(run_name, acc)
+            model_file = (output_dir / file_stem).with_suffix(".h5")
+            model.save(str(model_file))
+        else:
+            print(f"Using pretrained model: {model_file}")
+            file_stem = "{}--pt.h5".format(run_name)
+            acc = 0.0
 
         print("Fine-tuning model...")
         model, _, (_, ft_acc) = finetune_model(model_file, 0, datasets, metadata, epochs, steps, hparams)
@@ -63,7 +70,7 @@ if __name__ == "__main__":
 
         accuracies.append([acc, ft_acc])
 
-    accuracies: np.ndarray = np.array(accuracies)
+    accuracies = np.array(accuracies)
     np.save(str(output_dir / "results.npy"), accuracies)
 
     print(accuracies.shape)
