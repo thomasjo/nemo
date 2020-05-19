@@ -12,11 +12,13 @@ spec:
         command:
         - bin/pyrun
         - python/evaluate_model.py
+        # <source>
         - /data/partitions/2020-05/test
-        # - /data/partitions/2020-05
+        # <output>
         - output/new-data
-        - output/nemo--best.h5
-        # - output/nemo--best-backup.h5
+        # <model>
+        # - output/nemo--best.h5
+        - output/nemo-ft--best.h5
         resources:
           limits:
             memory: "16Gi"

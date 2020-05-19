@@ -12,8 +12,12 @@ spec:
         command:
         - bin/pyrun
         - python/training_suite.py
-        - /data/partitions/combined
-        - output/new-data/suite-combined
+        # <source>
+        - /data/partitions/2020-05
+        # <output>
+        - output/new-data/suite
+        # <model>
+        # - output/nemo-ft--best.h5
         resources:
           limits:
             memory: "16Gi"
