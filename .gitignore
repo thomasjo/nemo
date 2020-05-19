@@ -1,6 +1,7 @@
 .vscode/
+*.whl
 
 # Project-specific.
-/data/
-/output/
-/tmp/
+/data
+/output
+/tmp
