@@ -17,6 +17,7 @@ from pathlib import Path
 from nemo.datasets import load_datasets, save_labels
 from nemo.hparams import get_default_hparams
 from nemo.models import compile_model, create_model, evaluate_model, fit_model
+from nemo.utils import ensure_reproducibility
 
 
 def train_model(datasets, metadata, epochs, steps, hparams, image_size=224):
@@ -41,6 +42,9 @@ if __name__ == "__main__":
     epochs = int(args["--epochs"])
     steps = int(args["--steps"])
     image_size = int(args["--image-size"])
+
+    # Use fixed seeds and deterministic ops.
+    ensure_reproducibility(seed=42)
 
     train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
     datasets = (train_dataset, valid_dataset, test_dataset)

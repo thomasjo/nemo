@@ -17,6 +17,7 @@ from pathlib import Path
 from nemo.datasets import load_datasets, save_labels
 from nemo.hparams import get_default_hparams
 from nemo.models import compile_model, evaluate_model, fit_model, load_model
+from nemo.utils import ensure_reproducibility
 
 
 def finetune_model(model_file, initial_epoch, datasets, metadata, epochs, steps, hparams):
@@ -48,6 +49,9 @@ if __name__ == "__main__":
     epochs = int(args["--epochs"])
     steps = int(args["--steps"])
     image_size = int(args["--image-size"])
+
+    # Use fixed seeds and deterministic ops.
+    ensure_reproducibility(seed=42)
 
     hparams = get_default_hparams()
 

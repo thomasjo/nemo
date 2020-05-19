@@ -19,6 +19,7 @@ import numpy as np
 
 from nemo.datasets import load_datasets
 from nemo.hparams import get_default_hparams
+from nemo.utils import ensure_reproducibility
 
 from finetune_model import finetune_model
 from train_model import train_model
@@ -33,6 +34,9 @@ if __name__ == "__main__":
     epochs = int(args["--epochs"])
     steps = int(args["--steps"])
     image_size = int(args["--image-size"])
+
+    # Use fixed seeds and deterministic ops.
+    ensure_reproducibility(seed=42)
 
     train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir, image_size)
     datasets = (train_dataset, valid_dataset, test_dataset)

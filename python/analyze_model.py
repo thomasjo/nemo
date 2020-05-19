@@ -22,6 +22,7 @@ from nemo.datasets import dataset_from_dir, read_labels
 from nemo.images import load_and_preprocess_image
 from nemo.layers import Dropout
 from nemo.models import load_model
+from nemo.utils import ensure_reproducibility
 
 
 # Used for auto-tuning dataset prefetch size, etc.
@@ -95,5 +96,8 @@ if __name__ == "__main__":
     source_dir = Path(args["<source>"])
     output_dir = Path(args["<output>"])
     model_file = Path(args["<model>"])
+
+    # Use fixed seeds and deterministic ops.
+    ensure_reproducibility(seed=42)
 
     main(source_dir, output_dir, model_file)

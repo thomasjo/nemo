@@ -19,6 +19,7 @@ from tensorboard.plugins.hparams import api as hp
 from nemo.datasets import load_datasets
 from nemo.hparams import HParams, parse_config_file
 from nemo.train_model import train_model
+from nemo.utils import ensure_reproducibility
 
 
 METRIC_ACCURACY = "accuracy"
@@ -66,5 +67,8 @@ if __name__ == "__main__":
     config_file = Path(args["--config"])
     epochs = int(args["--epochs"])
     steps_per_epoch = int(args["--steps"])
+
+    # Use fixed seeds and deterministic ops.
+    ensure_reproducibility(seed=42)
 
     main(source_dir, output_dir, config_file, epochs, steps_per_epoch)
