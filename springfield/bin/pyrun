@@ -7,10 +7,13 @@ args="$@"
 export TF_CPP_MIN_LOG_LEVEL="2"
 
 # Copy files from persistent storage to boost I/O performance.
+echo "Copying data... "
 cp -r /storage/nemo/data /data
 
 # Execute command.
-python3 $args
+echo "Executing python with args"
+echo "  ${args}"
+python3.8 $args
 
-# Copy results to persistent storage.
+# Copy local results to persistent storage.
 # ...
