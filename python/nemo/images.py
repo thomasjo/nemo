@@ -1,22 +1,21 @@
 import tensorflow as tf
 
 
-IMAGE_SIZE = 224
-
-
-def preprocess_image(image):
+def preprocess_image(image, image_size):
     image = tf.io.decode_png(image, channels=3)
     image = tf.image.convert_image_dtype(image, tf.float32)
-    image = tf.image.resize_with_pad(image, IMAGE_SIZE, IMAGE_SIZE)
+    image = tf.image.resize_with_pad(image, image_size, image_size)
 
     return image
 
 
-def load_and_preprocess_image(path, *args):
-    image = tf.io.read_file(path)
-    image = preprocess_image(image)
+def load_and_preprocess_image(image_size=224):
+    def _impl(path, *args):
+        image = tf.io.read_file(path)
+        image = preprocess_image(image, image_size)
+        return (image, *args)
 
-    return (image, *args)
+    return _impl
 
 
 def augment_image(image, *args):

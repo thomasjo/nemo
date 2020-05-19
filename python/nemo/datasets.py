@@ -14,6 +14,10 @@ BATCH_SIZE = 32
 
 
 def labels_for_dir(path):
+    label_files = sorted(path.parent.rglob("labels.yaml"), key=lambda p: len(str(p)))
+    if label_files:
+        return read_labels(label_files[0])
+
     labels = sorted(child.name for child in path.glob("*/") if child.is_dir())
     labels = dict((name, index) for index, name in enumerate(labels))
     return labels
@@ -46,7 +50,7 @@ def dataset_from_dir(source_dir, label_lookup, return_files=False):
     return dataset, len(files)
 
 
-def load_datasets(data_dir):
+def load_datasets(data_dir, image_size=224):
     # TODO: Make these configurable?
     train_dir = data_dir / "train"
     valid_dir = data_dir / "valid"
@@ -58,7 +62,7 @@ def load_datasets(data_dir):
     # Prepare training dataset.
     train_dataset, train_count = dataset_from_dir(train_dir, labels)
     train_dataset = train_dataset.shuffle(train_count)
-    train_dataset = train_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+    train_dataset = train_dataset.map(load_and_preprocess_image(image_size), num_parallel_calls=AUTOTUNE)
 
     # TODO: Consider moving this block to call site.
     train_dataset = train_dataset.map(augment_image, num_parallel_calls=AUTOTUNE)
@@ -67,8 +71,7 @@ def load_datasets(data_dir):
 
     # Prepare validation dataset.
     valid_dataset, valid_count = dataset_from_dir(valid_dir, labels)
-    valid_dataset = valid_dataset.shuffle(valid_count)
-    valid_dataset = valid_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+    valid_dataset = valid_dataset.map(load_and_preprocess_image(image_size), num_parallel_calls=AUTOTUNE)
 
     # TODO: Consider moving this block to call site.
     valid_dataset = valid_dataset.batch(BATCH_SIZE)
@@ -76,8 +79,7 @@ def load_datasets(data_dir):
 
     # Prepare test dataset.
     test_dataset, test_count = dataset_from_dir(test_dir, labels)
-    test_dataset = test_dataset.shuffle(test_count)
-    test_dataset = test_dataset.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+    test_dataset = test_dataset.map(load_and_preprocess_image(image_size), num_parallel_calls=AUTOTUNE)
 
     # TODO: Consider moving this block to call site.
     test_dataset = test_dataset.batch(BATCH_SIZE)

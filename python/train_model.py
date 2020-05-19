@@ -3,9 +3,10 @@ Usage:
   train_model.py [options] <source> <output>
 
 Options:
-  --epochs=N  Number of training epochs. [default: 25]
-  --steps=N   Number of training steps per epochs. [default: 0]
-  -h, --help  Show this screen.
+  --epochs=N      Number of training epochs. [default: 25]
+  --steps=N       Number of training steps per epochs. [default: 0]
+  --image-size=S  Target width and height of images after pre-processing.  [default: 224]
+  -h, --help      Show this screen.
 """
 
 from docopt import docopt
@@ -18,9 +19,9 @@ from nemo.hparams import get_default_hparams
 from nemo.models import compile_model, create_model, evaluate_model, fit_model
 
 
-def train_model(datasets, metadata, epochs, steps, hparams):
+def train_model(datasets, metadata, epochs, steps, hparams, image_size=224):
     num_classes = len(metadata.labels)
-    input_shape = (224, 224, 3)
+    input_shape = (image_size, image_size, 3)
 
     model, base_model = create_model(input_shape, num_classes, hparams)
 
@@ -39,12 +40,13 @@ if __name__ == "__main__":
     output_dir = Path(args["<output>"])
     epochs = int(args["--epochs"])
     steps = int(args["--steps"])
+    image_size = int(args["--image-size"])
 
     train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
     datasets = (train_dataset, valid_dataset, test_dataset)
     hparams = get_default_hparams()
 
-    model, history, (loss, accuracy) = train_model(datasets, metadata, epochs, steps, hparams)
+    model, history, (loss, accuracy) = train_model(datasets, metadata, epochs, steps, hparams, image_size)
 
     # Ensure output directory exists.
     output_dir.mkdir(parents=True, exist_ok=True)

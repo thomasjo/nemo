@@ -4,7 +4,7 @@ Usage:
 
 Options:
   --initial-epoch=N  Number of the initial epoch. [default: 0]
-  --epochs=N         Number of fine-tuning epochs. [default: 5]
+  --epochs=N         Number of fine-tuning epochs. [default: 25]
   --steps=N          Number of training steps per epochs. [default: 0]
   -h, --help         Show this screen.
 """
@@ -22,6 +22,8 @@ from nemo.models import compile_model, evaluate_model, fit_model, load_model
 def finetune_model(model_file, initial_epoch, datasets, metadata, epochs, steps, hparams):
     # Load a pre-trained model.
     model, base_model = load_model(model_file)
+
+    metrics = evaluate_model(model, datasets)
 
     # Only fine-tune the last few layers of the base model.
     base_model.trainable = True
@@ -45,10 +47,11 @@ if __name__ == "__main__":
     initial_epoch = int(args["--initial-epoch"])
     epochs = int(args["--epochs"])
     steps = int(args["--steps"])
+    image_size = int(args["--image-size"])
 
     hparams = get_default_hparams()
 
-    train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
+    train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir, image_size)
     datasets = (train_dataset, valid_dataset, test_dataset)
 
     model, history, (loss, accuracy) = finetune_model(

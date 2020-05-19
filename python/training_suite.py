@@ -3,10 +3,11 @@ Usage:
   training_suite.py [options] <source> <output>
 
 Options:
-  --repeat=N  Number of times to repeat the training block. [default: 5]
-  --epochs=N  Number of training epochs. [default: 25]
-  --steps=N   Number of training steps per epochs. [default: 0]
-  -h, --help  Show this screen.
+  --repeat=N      Number of times to repeat the training block. [default: 10]
+  --epochs=N      Number of training epochs. [default: 25]
+  --steps=N       Number of training steps per epochs. [default: 0]
+  --image-size=S  Target width and height of images after pre-processing.  [default: 224]
+  -h, --help      Show this screen.
 """
 
 from docopt import docopt
@@ -17,9 +18,9 @@ from pathlib import Path
 import numpy as np
 
 from nemo.datasets import load_datasets
-from nemo.finetune_model import finetune_model
 from nemo.hparams import get_default_hparams
 
+from finetune_model import finetune_model
 from train_model import train_model
 
 
@@ -30,8 +31,9 @@ if __name__ == "__main__":
     repeat = int(args["--repeat"])
     epochs = int(args["--epochs"])
     steps = int(args["--steps"])
+    image_size = int(args["--image-size"])
 
-    train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
+    train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir, image_size)
     datasets = (train_dataset, valid_dataset, test_dataset)
     hparams = get_default_hparams()
 
@@ -46,7 +48,7 @@ if __name__ == "__main__":
         print("--- Starting trial:", run_name)
 
         print("Training model...")
-        model, _, (_, acc) = train_model(datasets, metadata, epochs, steps, hparams)
+        model, _, (_, acc) = train_model(datasets, metadata, epochs, steps, hparams, image_size)
 
         file_stem = "{}--{:.3f}.h5".format(run_name, acc)
         model_file = (output_dir / file_stem).with_suffix(".h5")
