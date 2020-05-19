@@ -12,23 +12,23 @@ rope = "*"
 
 [packages]
 docopt = "*"
-gast = "==0.2.2"  # Lock version due to breaking changes
+gast = "*"
 h5py = "*"
 imageio = "*"
 matplotlib = "*"
-numpy = "==1.16.4"  # Lock due to annoying deprecation warnings
+numpy = "*"
 opencv-python = "*"
 pandas = "*"
 pyyaml = "*"
 scikit-image = "*"
 scikit-learn = "*"
 scipy = "*"
-tensorflow = "==2.1.0"
+tensorflow = "==2.2.0"
 tensorflow-hub = "*"
 tqdm = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.8"
 
 [pipenv]
 allow_prereleases = true
