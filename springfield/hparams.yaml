@@ -1,4 +1,4 @@
 name: nemo-hparams
-image: thomasjo/nemo:latest
+image: thomasjo/nemo:tensorflow-2.2.0
 workingDir: /storage/nemo
 command: ["python3", "python/find_hparams.py", "data", "output"]

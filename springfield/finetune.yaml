@@ -1,19 +1,20 @@
 kind: Job
 apiVersion: batch/v1
 metadata:
-  name: nemo-train
+  name: nemo-finetune
 spec:
   template:
     spec:
       containers:
-      - name: nemo-train
+      - name: nemo-finetune
         image: thomasjo/nemo:tensorflow-2.2.0
         workingDir: /storage/nemo
         command:
         - bin/pyrun
-        - python/train_model.py
+        - python/finetune_model.py
         - /data/partitions/2019-06
         - output
+        - output/nemo--best.h5
         resources:
           limits:
             memory: "16Gi"

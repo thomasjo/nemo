@@ -1,19 +1,19 @@
 kind: Job
 apiVersion: batch/v1
 metadata:
-  name: nemo-train
+  name: nemo-suite
 spec:
   template:
     spec:
       containers:
-      - name: nemo-train
+      - name: nemo-suite
         image: thomasjo/nemo:tensorflow-2.2.0
         workingDir: /storage/nemo
         command:
         - bin/pyrun
-        - python/train_model.py
-        - /data/partitions/2019-06
-        - output
+        - python/training_suite.py
+        - /data/partitions/combined
+        - output/new-data/suite-combined
         resources:
           limits:
             memory: "16Gi"
