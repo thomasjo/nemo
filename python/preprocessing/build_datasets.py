@@ -1,10 +1,11 @@
 import random
 import shutil
+from argparse import ArgumentParser
 from contextlib import contextmanager
 from pathlib import Path
 
 LABEL_PREFIXES = {
-    "Agglutinated": "agglutinated",
+    "Agglu": "agglutinated",
     "Bent": "benthic",
     "Plank": "planktic",
     "Sed": "sediment",
@@ -39,20 +40,24 @@ def copy_files_to_dir(src_files, dst_dir):
 
 
 if __name__ == "__main__":
-    file_dir = Path(__file__).parent.resolve()
-    root_dir = file_dir.parent.parent
+    parser = ArgumentParser()
+    parser.add_argument("source", type=Path)
+    parser.add_argument("output", type=Path)
+    args = parser.parse_args()
 
-    # TODO: Make these configurable?
-    data_dir = root_dir / "data"
-    processed_dir = data_dir / "processed"
+    source_dir: Path = args.source
+    output_dir: Path = args.output
 
-    train_dir = recreate_dir(data_dir / "train")
-    valid_dir = recreate_dir(data_dir / "valid")
-    test_dir = recreate_dir(data_dir / "test")
+    train_dir = recreate_dir(output_dir / "train")
+    valid_dir = recreate_dir(output_dir / "valid")
+    test_dir = recreate_dir(output_dir / "test")
 
     for prefix, label in LABEL_PREFIXES.items():
         # Find all patches for current label.
-        patches = sorted(processed_dir.rglob(f"{prefix}*patch*.png"))
+        patches = sorted(source_dir.rglob(f"{prefix}*patch*.png"))
+
+        if len(patches) == 0:
+            continue
 
         # Shuffle patches in a reproducible manner.
         with random_seed(42):
