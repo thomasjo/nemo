@@ -29,7 +29,7 @@ if __name__ == "__main__":
     args = docopt(__doc__)
     source_dir = Path(args["<source>"])
     output_dir = Path(args["<output>"])
-    model_file = Path(args["<model>"])
+    pretrained_model_file = Path(args["<model>"]) if args["<model>"] else None
     repeat = int(args["--repeat"])
     epochs = int(args["--epochs"])
     steps = int(args["--steps"])
@@ -53,21 +53,19 @@ if __name__ == "__main__":
         print("--- Starting trial:", run_name)
 
         # Skip training if a pretrained model has been provided.
-        if not model_file:
-            print("Training model...")
-            model, _, (_, acc) = train_model(datasets, metadata, epochs, steps, hparams, image_size)
-
-            file_stem = "{}--{:.3f}.h5".format(run_name, acc)
-            model_file = (output_dir / file_stem).with_suffix(".h5")
-            model.save(str(model_file))
-        else:
+        if model_file := pretrained_model_file:
             print(f"Using pretrained model: {model_file}")
             file_stem = "{}--pt.h5".format(run_name)
             acc = 0.0
+        else:
+            print("Training model...")
+            model, _, (_, acc) = train_model(datasets, metadata, epochs, steps, hparams, image_size)
+            file_stem = "{}--{:.3f}.h5".format(run_name, acc)
+            model_file = (output_dir / file_stem).with_suffix(".h5")
+            model.save(str(model_file))
 
         print("Fine-tuning model...")
         model, _, (_, ft_acc) = finetune_model(model_file, 0, datasets, metadata, epochs, steps, hparams)
-
         file_stem = "{}--{:.3f}.h5".format(file_stem, ft_acc)
         model_file = (output_dir / file_stem).with_suffix(".h5")
         model.save(str(model_file))
