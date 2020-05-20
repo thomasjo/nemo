@@ -1,7 +1,7 @@
 kind: Job
 apiVersion: batch/v1
 metadata:
-  name: nemo-evaluate
+  name: nemo-evaluate--new-data
 spec:
   template:
     spec:

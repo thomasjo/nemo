@@ -1,7 +1,7 @@
 kind: Job
 apiVersion: batch/v1
 metadata:
-  name: nemo-finetune
+  name: nemo-finetune--new-data
 spec:
   template:
     spec:
