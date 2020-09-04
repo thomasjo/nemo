@@ -1,3 +1,6 @@
-/data/
-/output/
-/tmp/
+.venv/
+.vscode/
+
+data/
+output/
+tmp/

@@ -7,7 +7,7 @@ args="$@"
 parent_dir=$(dirname $(readlink -f "$0"))
 root_dir=$(dirname $parent_dir)
 
-image_tag="thomasjo/nemo:tensorflow-2.2.0"
+image_tag="thomasjo/nemo:tensorflow-2.3.0"
 
 docker run --rm -it \
   --privileged \

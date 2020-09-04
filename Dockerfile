@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.2.0-gpu
+FROM tensorflow/tensorflow:2.3.0-gpu
 
 # Ensure apt-get is in non-interactive mode during build.
 ARG DEBIAN_FRONTEND=noninteractive
@@ -50,12 +50,8 @@ ADD Pipfile* /tmp/
 RUN pipenv install --system --deploy
 
 # Install custom TensorFlow package compiled for Springfield.
-ADD tensorflow-2.2.0-cp38-cp38-linux_x86_64.whl /tmp/
-RUN pip3.8 install --force-reinstall tensorflow-2.2.0-cp38-cp38-linux_x86_64.whl
-
-# Bundle executable project files.
-# ADD bin/* /usr/local/bin/
-# ADD python /root/python
+# ADD tensorflow-2.3.0-cp38-cp38-linux_x86_64.whl /tmp/
+# RUN pip3.8 install --force-reinstall tensorflow-2.3.0-cp38-cp38-linux_x86_64.whl
 
 RUN rm -rf /tmp/*
 
