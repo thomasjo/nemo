@@ -13,7 +13,31 @@ from nemo.layers import Dropout
 BATCH_SIZE = 32
 
 
-def create_model(input_shape, num_classes, hparams):
+class Classifier(keras.Model):
+    def __init__(self, feature_extractor: keras.Model, num_classes: int, hparams):
+        super().__init__()
+
+        self.feature_extractor = feature_extractor
+
+        self.classifier = Sequential(
+            [
+                Flatten(),
+                Dense(hparams.num_units_fc1, activation="relu"),
+                Dropout(hparams.dropout),
+                Dense(hparams.num_units_fc2, activation="relu"),
+                Dropout(hparams.dropout),
+                Dense(num_classes, activation="softmax"),
+            ]
+        )
+
+    def call(self, inputs):
+        x = self.feature_extractor(inputs)
+        x = self.classifier(x)
+
+        return x
+
+
+def create_model_old(input_shape, num_classes, hparams):
     # Load a pre-trained base model to use for feature extraction.
     base_model = VGG16(include_top=False, weights="imagenet", input_shape=input_shape)
     base_model.trainable = False
@@ -32,6 +56,17 @@ def create_model(input_shape, num_classes, hparams):
     model.add(Dense(num_classes, activation="softmax"))
 
     return model, base_model
+
+
+def create_model(input_shape, num_classes, hparams):
+    # Load a pre-trained base model to use for feature extraction.
+    feature_extractor = VGG16(include_top=False, weights="imagenet", input_shape=input_shape)
+    feature_extractor.trainable = False
+
+    # Create model by stacking a prediction layer on top of the base model.
+    model = Classifier(feature_extractor, num_classes, hparams)
+
+    return model, feature_extractor
 
 
 def load_model(model_file):
