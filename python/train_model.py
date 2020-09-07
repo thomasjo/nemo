@@ -14,6 +14,8 @@ from docopt import docopt
 from datetime import datetime
 from pathlib import Path
 
+import tensorflow as tf
+
 from nemo.datasets import load_datasets, save_labels
 from nemo.hparams import get_default_hparams
 from nemo.models import compile_model, create_model, evaluate_model, fit_model
@@ -35,6 +37,11 @@ def train_model(datasets, metadata, epochs, steps, hparams, image_size=224):
     return model, history, metrics
 
 
+def limit_cpu_threads():
+    tf.config.threading.set_inter_op_parallelism_threads(4)
+    tf.config.threading.set_intra_op_parallelism_threads(4)
+
+
 if __name__ == "__main__":
     args = docopt(__doc__)
     source_dir = Path(args["<source>"])
@@ -45,6 +52,8 @@ if __name__ == "__main__":
 
     # Use fixed seeds and deterministic ops.
     ensure_reproducibility(seed=42)
+
+    limit_cpu_threads()
 
     train_dataset, valid_dataset, test_dataset, metadata = load_datasets(source_dir)
     datasets = (train_dataset, valid_dataset, test_dataset)
