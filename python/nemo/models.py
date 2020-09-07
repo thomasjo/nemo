@@ -104,7 +104,7 @@ def fit_model(model, datasets, metadata, epochs, steps=0, initial_epoch=0):
         epochs=epochs,
         steps_per_epoch=steps,
         callbacks=[early_stopping],
-        verbose=2,
+        verbose=1,
     )
 
     return model, history
