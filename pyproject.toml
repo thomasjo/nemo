@@ -16,32 +16,26 @@ rope = "^0.17.0"
 yapf = "^0.30.0"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 
 # TensorFlow is expected to be supplied by the container image.
-tensorflow = { version = "^2.3.0", optional = true }
+# tensorflow = { version = "^2.3.0", optional = true }
 
-docopt = "*"
-gast = "*"
-h5py = "*"
-imageio = "*"
-matplotlib = "*"
-numpy = "*"
-opencv-python-headless = "*"
-pandas = "*"
-pyyaml = "*"
-scikit-image = "*"
-scikit-learn = "*"
-scipy = "*"
-tensorflow-hub = "*"
-tqdm = "*"
+h5py = "^2.10.0"
+matplotlib = "^3.3.1"
+numpy = "^1.18.5"
+opencv-python-headless = "^4.4.0.42"
+pandas = "^1.1.1"
+pillow = "^7.2.0"
+pyyaml = "^5.3.1"
+scikit-image = "^0.17.2"
+scikit-learn = "^0.23.2"
+scipy = "^1.4.1"
+tensorflow = "^2.3.0"
+wandb = "^0.9.6"
 
-[tool.poetry.extras]
-tensorflow = ["tensorflow"]
-
-[tool.black]
-line_length = 120
-target_version = ["py36"]
+# [tool.poetry.extras]
+# tensorflow = ["tensorflow"]
 
 [tool.isort]
 force_grid_wrap = 0
