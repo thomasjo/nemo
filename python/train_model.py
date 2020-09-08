@@ -48,7 +48,7 @@ def train_model(datasets, metadata, epochs, steps, hparams, image_size):
     model = create_model(input_shape, num_classes, hparams)
     model = compile_model(model, learning_rate, hparams)
     model, history = fit_model(model, datasets, metadata, epochs, steps)
-    metrics = evaluate_model(model, datasets)
+    metrics = evaluate_model(model, datasets, steps)
 
     return model, history, metrics
 

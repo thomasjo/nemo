@@ -82,8 +82,8 @@ def fit_model(model, datasets, metadata, epochs, steps_per_epoch=None, initial_e
     return model, history
 
 
-def evaluate_model(model, datasets):
+def evaluate_model(model, datasets, steps=None):
     _, _, test_dataset = datasets
-    metrics = model.evaluate(test_dataset, verbose=2)
+    metrics = model.evaluate(test_dataset, verbose=2, steps=steps)
 
     return metrics
