@@ -1,6 +1,6 @@
-from tensorflow import keras
+import tensorflow.keras as keras
+
 from tensorflow.keras.applications import VGG16
-from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import Dense, Flatten
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.metrics import CategoricalAccuracy
@@ -10,52 +10,26 @@ from nemo.hparams import get_optimizer
 from nemo.layers import Dropout
 
 
-BATCH_SIZE = 32
-
-
 class Classifier(keras.Model):
     def __init__(self, feature_extractor: keras.Model, num_classes: int, hparams):
         super().__init__()
 
         self.feature_extractor = feature_extractor
 
-        self.classifier = Sequential(
-            [
-                Flatten(),
-                Dense(hparams.num_units_fc1, activation="relu"),
-                Dropout(hparams.dropout),
-                Dense(hparams.num_units_fc2, activation="relu"),
-                Dropout(hparams.dropout),
-                Dense(num_classes, activation="softmax"),
-            ]
-        )
+        self.classifier = Sequential([
+            Flatten(),
+            Dense(hparams.num_units_fc1, activation="relu"),
+            Dropout(hparams.dropout),
+            Dense(hparams.num_units_fc2, activation="relu"),
+            Dropout(hparams.dropout),
+            Dense(num_classes, activation="softmax"),
+        ])
 
-    def call(self, inputs):
-        x = self.feature_extractor(inputs)
-        x = self.classifier(x)
+    def call(self, inputs, training=None):
+        x = self.feature_extractor(inputs, training=training)
+        x = self.classifier(x, training=training)
 
         return x
-
-
-def create_model_old(input_shape, num_classes, hparams):
-    # Load a pre-trained base model to use for feature extraction.
-    base_model = VGG16(include_top=False, weights="imagenet", input_shape=input_shape)
-    base_model.trainable = False
-
-    # Create model by stacking a prediction layer on top of the base model.
-    model = Sequential()
-    model.add(base_model)
-    model.add(Flatten())
-
-    model.add(Dense(hparams.num_units_fc1, activation="relu"))
-    model.add(Dropout(hparams.dropout))
-
-    model.add(Dense(hparams.num_units_fc2, activation="relu"))
-    model.add(Dropout(hparams.dropout))
-
-    model.add(Dense(num_classes, activation="softmax"))
-
-    return model, base_model
 
 
 def create_model(input_shape, num_classes, hparams):
@@ -66,15 +40,14 @@ def create_model(input_shape, num_classes, hparams):
     # Create model by stacking a prediction layer on top of the base model.
     model = Classifier(feature_extractor, num_classes, hparams)
 
-    return model, feature_extractor
+    return model
 
 
 def load_model(model_file):
     custom_objects = {"Dropout": Dropout}
-    model = keras.models.load_model(str(model_file), custom_objects)
-    base_model = model.layers[0]
+    model: Classifier = keras.models.load_model(str(model_file), custom_objects)
 
-    return model, base_model
+    return model
 
 
 def compile_model(model, learning_rate, hparams):
@@ -87,23 +60,22 @@ def compile_model(model, learning_rate, hparams):
     return model
 
 
-def fit_model(model, datasets, metadata, epochs, steps=0, initial_epoch=0):
+def fit_model(model, datasets, metadata, epochs, steps_per_epoch=None, initial_epoch=0):
     train_dataset, valid_dataset, _ = datasets
 
-    if steps == 0:
-        steps = metadata.train_count // BATCH_SIZE
-        steps *= 4  # Increase steps because of image augmentations
+    callbacks = list()
 
     # Use early stopping to prevent overfitting, etc.
-    early_stopping = EarlyStopping(patience=3, restore_best_weights=True)
+    # callbacks.append(keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True))
 
     history = model.fit(
-        train_dataset.repeat(),
+        train_dataset,
         validation_data=valid_dataset,
         initial_epoch=initial_epoch,
         epochs=epochs,
-        steps_per_epoch=steps,
-        callbacks=[early_stopping],
+        steps_per_epoch=steps_per_epoch,
+        validation_steps=steps_per_epoch,
+        callbacks=callbacks,
         verbose=1,
     )
 

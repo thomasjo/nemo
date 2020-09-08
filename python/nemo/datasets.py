@@ -8,11 +8,6 @@ import yaml
 from nemo.images import augment_image, load_and_preprocess_image
 
 
-# Used for auto-tuning dataset prefetch size, etc.
-AUTOTUNE = tf.data.experimental.AUTOTUNE
-BATCH_SIZE = 32
-
-
 def labels_for_dir(path):
     label_files = sorted(path.parent.rglob("labels.yaml"), key=lambda p: len(str(p)))
     if label_files:
@@ -50,11 +45,13 @@ def dataset_from_dir(source_dir, label_lookup, return_files=False):
     return dataset, len(files)
 
 
-def load_datasets(data_dir, image_size=224):
+def load_datasets(args):
+    buffer_size = 2
+
     # TODO: Make these configurable?
-    train_dir = data_dir / "train"
-    valid_dir = data_dir / "valid"
-    test_dir = data_dir / "test"
+    train_dir = args.data_dir / "train"
+    valid_dir = args.data_dir / "valid"
+    test_dir = args.data_dir / "test"
 
     # Fetch labels as a map from names to indices.
     labels = labels_for_dir(train_dir)
@@ -62,28 +59,28 @@ def load_datasets(data_dir, image_size=224):
     # Prepare training dataset.
     train_dataset, train_count = dataset_from_dir(train_dir, labels)
     train_dataset = train_dataset.shuffle(train_count)
-    train_dataset = train_dataset.map(load_and_preprocess_image(image_size), num_parallel_calls=AUTOTUNE)
+    train_dataset = train_dataset.map(load_and_preprocess_image(args.image_size), num_parallel_calls=args.num_workers, deterministic=True)
 
     # TODO: Consider moving this block to call site.
-    train_dataset = train_dataset.map(augment_image, num_parallel_calls=AUTOTUNE)
-    train_dataset = train_dataset.batch(BATCH_SIZE)
-    train_dataset = train_dataset.prefetch(AUTOTUNE)
+    train_dataset = train_dataset.map(augment_image, num_parallel_calls=args.num_workers, deterministic=True)
+    train_dataset = train_dataset.batch(args.batch_size)
+    train_dataset = train_dataset.prefetch(buffer_size)
 
     # Prepare validation dataset.
     valid_dataset, valid_count = dataset_from_dir(valid_dir, labels)
-    valid_dataset = valid_dataset.map(load_and_preprocess_image(image_size), num_parallel_calls=AUTOTUNE)
+    valid_dataset = valid_dataset.map(load_and_preprocess_image(args.image_size), num_parallel_calls=args.num_workers, deterministic=True)
 
     # TODO: Consider moving this block to call site.
-    valid_dataset = valid_dataset.batch(BATCH_SIZE)
-    valid_dataset = valid_dataset.prefetch(AUTOTUNE)
+    valid_dataset = valid_dataset.batch(args.batch_size)
+    valid_dataset = valid_dataset.prefetch(buffer_size)
 
     # Prepare test dataset.
     test_dataset, test_count = dataset_from_dir(test_dir, labels)
-    test_dataset = test_dataset.map(load_and_preprocess_image(image_size), num_parallel_calls=AUTOTUNE)
+    test_dataset = test_dataset.map(load_and_preprocess_image(args.image_size), num_parallel_calls=args.num_workers, deterministic=True)
 
     # TODO: Consider moving this block to call site.
-    test_dataset = test_dataset.batch(BATCH_SIZE)
-    test_dataset = test_dataset.prefetch(AUTOTUNE)
+    test_dataset = test_dataset.batch(args.batch_size)
+    test_dataset = test_dataset.prefetch(buffer_size)
 
     Metadata = namedtuple("Metadata", ["labels", "train_count", "valid_count", "test_count"])
     metadata = Metadata(labels, train_count, valid_count, test_count)
