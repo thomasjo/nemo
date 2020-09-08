@@ -9,11 +9,11 @@ description = ""
 authors = ["Thomas Johansen <thomas.h.johansen@uit.no>"]
 
 [tool.poetry.dev-dependencies]
-black = "^20.8b1"
 flake8 = "^3.8.3"
 flake8-isort = "^3.0.0"
 isort = { version = "^4.3.21", extras = ["pyproject"] }
 rope = "^0.17.0"
+yapf = "^0.30.0"
 
 [tool.poetry.dependencies]
 python = "^3.6"
@@ -46,13 +46,8 @@ target_version = ["py36"]
 [tool.isort]
 force_grid_wrap = 0
 include_trailing_comma = true
-line_length = 120
+line_length = 999
 lines_after_imports = 2
-lines_between_types = 0
+lines_between_types = 1
 multi_line_output = 3
 use_parentheses = true
-
-# Custom sections for some important modules.
-known_docopt = "docopt"
-known_tensorflow = "tensorflow,tensorboard"
-sections = "DOCOPT,FUTURE,STDLIB,TENSORFLOW,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"

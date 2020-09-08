@@ -1,0 +1,4 @@
+[style]
+based_on_style = pep8
+column_limit = 999
+split_before_arithmetic_operator = true
